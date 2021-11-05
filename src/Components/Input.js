@@ -11,7 +11,9 @@ export default class Input extends Component {
 
   validate = () => {
     let validate = this.props.validate
-    if (validate && this.state.text !== '') {
+    if (this.props.throwable) {
+      return <Text style={style.error_msg}>{this.props.throwable}</Text>
+    } else if (validate && this.state.text !== '') {
       if (validate.test(this.state.text.toLowerCase()) === false)
         return <Text style={style.error_msg}>{this.props.error_msg}</Text>
     }
@@ -24,7 +26,6 @@ export default class Input extends Component {
   }
 
   render() {
-    this.validate()
     return (
       <View style={[style, this.props.style]}>
         <TextInput

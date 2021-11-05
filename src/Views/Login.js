@@ -13,6 +13,7 @@ export default class Login extends Component {
       input_style: style.input,
       email_regex: /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
       password_regex: RegExp(".{8,25}"),
+      login_failed: null,
     }
   }
 
@@ -29,14 +30,12 @@ export default class Login extends Component {
         if (parseInt(res) !== 0) {
           this.setState({input_style: style.input})
           this.props.callback(res)
-        } else {
-          this.setState({input_style: style.input_error})
-        }
+        } else
+          this.setState({login_failed: 'Email y/o contraseña incorrectos'})
       });
   }
 
   render() {
-    console.log(this.state.email)
     return (
       <ScrollView>
         <Text>OakMart</Text>
@@ -45,14 +44,16 @@ export default class Login extends Component {
           keyboardType='email-address'
           validate={this.state.email_regex}
           error_msg='Email no válido'
-          onChangeText={e => this.setState({email: e})}/>
+          throwable={this.state.login_failed}
+          onChangeText={e => this.setState({email: e, login_failed: null})}/>
         <Input
           style={style.input}
           placeholder = 'Contraseña'
           validate={this.state.password_regex}
           error_msg='Contraseña no válida, debe de contener de entre 8 a 25 caracteres'
           secureTextEntry = {true}
-          onChangeText={e => this.setState({password: e})}/>
+          throwable={this.state.login_failed}
+          onChangeText={e => this.setState({password: e, login_failed: null})}/>
         <TouchableOpacity
           style={style.btn}
           onPress={this.login}>
@@ -66,9 +67,6 @@ export default class Login extends Component {
 const style = StyleSheet.create({
   input: {
     borderWidth: 1,
-  },
-  input_error: {
-    borderColor: 'red',
   },
   btn: {
     borderWidth: 1,
