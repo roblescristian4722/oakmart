@@ -1,7 +1,6 @@
 import React from 'react';
 import type {Node} from 'react';
-import Main from './src/Main';
-import Login from './src/Login';
+import Main from './src/Views/Main';
 import {
   SafeAreaView,
   ScrollView,
@@ -55,7 +54,7 @@ const App: () => Node = () => {
 
   return (
     <SafeAreaView /*style={backgroundStyle}*/>
-      <Login/>
+      <Main />
     </SafeAreaView>
   );
 };
