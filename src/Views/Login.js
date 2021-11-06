@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { ScrollView, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import Input from '../Components/Input';
+import storage from '../Components/storage';
 
 export default class Login extends Component {
   constructor(props) {
@@ -29,7 +30,12 @@ export default class Login extends Component {
         // Si el usuario se loggea exitosamente entonces retornamos sus datos
         if (parseInt(res) !== 0) {
           this.setState({input_style: style.input})
-          this.props.callback(res)
+          // Almacena los datos del usuario en el almacenamiento del dispositivo
+          storage.save({
+            key: 'userData',
+            data: res
+          })
+          this.props.redirect('Home')
         } else
           this.setState({login_failed: 'Email y/o contraseña incorrectos'})
       });
@@ -46,6 +52,7 @@ export default class Login extends Component {
           error_msg='Email no válido'
           throwable={this.state.login_failed}
           onChangeText={e => this.setState({email: e, login_failed: null})}/>
+
         <Input
           style={style.input}
           placeholder = 'Contraseña'
@@ -54,11 +61,19 @@ export default class Login extends Component {
           secureTextEntry = {true}
           throwable={this.state.login_failed}
           onChangeText={e => this.setState({password: e, login_failed: null})}/>
+
         <TouchableOpacity
           style={style.btn}
           onPress={this.login}>
           <Text style={style.btn_text}>Iniciar Sesión</Text>
         </TouchableOpacity>
+
+        <View style={style.create_account_container}>
+          <Text>¿No tienes una cuenta? </Text>
+          <TouchableOpacity style={style.create_account_btn}>
+            <Text style={style.create_account_btn_text}>¡Crea una cuenta ahora!</Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
     )
   }
@@ -74,4 +89,14 @@ const style = StyleSheet.create({
   btn_text: {
     textAlign: 'center',
   },
+  create_account_container: {
+    flexDirection: 'row',
+  },
+  create_account_btn_text: {
+    flex: 1,
+    color: 'blue',
+  },
+  create_account_btn: {
+    flex: 1,
+  }
 })
