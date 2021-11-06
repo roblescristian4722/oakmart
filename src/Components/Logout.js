@@ -10,7 +10,7 @@ export default class Logout extends Component {
 
   removeUserData = () => {
     storage.remove({ key: 'userData' })
-    this.props.redirect('Login')
+    this.props.navigation.navigate('Login')
   }
 
   render() {

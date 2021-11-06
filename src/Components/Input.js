@@ -5,24 +5,25 @@ export default class Input extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      text: ''
+      text: '',
+      validated: false,
     }
   }
 
-  validate = () => {
+  validate = (e) => {
     let validate = this.props.validate
-    if (this.props.throwable) {
-      return <Text style={style.error_msg}>{this.props.throwable}</Text>
-    } else if (validate && this.state.text !== '') {
-      if (validate.test(this.state.text.toLowerCase()) === false)
-        return <Text style={style.error_msg}>{this.props.error_msg}</Text>
-    }
-    return null
+    if (validate && e !== '') {
+      if (validate.test(e.toLowerCase()) === false)
+        this.setState({ validated: false })
+      else
+        this.setState({ validated: true })
+    } else
+      this.setState({ validated: true })
   }
 
   changeText = (e) => {
     this.props.onChangeText(e)
-    this.setState({text: e})
+    this.setState({text: e}, this.validate(e))
   }
 
   render() {
@@ -34,7 +35,12 @@ export default class Input extends Component {
           secureTextEntry={this.props.secureTextEntry}
           onChangeText={this.changeText}
         />
-        {this.validate()}
+        {/*Mensaje throwable que tiene prioridad por sobre el mensaje de error*/}
+        {this.props.throwable ?
+          <Text style={style.error_msg}>{this.props.throwable}</Text> : null}
+        {/*Mensaje de error que se muestra cuando la función validate no se cumple*/}
+        {(this.state.validated === false && this.state.text !== '') ?
+          <Text style={style.error_msg}>{this.props.error_msg}</Text> : null}
       </View>
     )
   }

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { ScrollView, Text } from 'react-native';
-import Logout from '../Components/Logout';
+import { ScrollView, Text, TouchableOpacity } from 'react-native';
+import storage from '../Components/storage';
 
 export default class Main extends Component {
   constructor(props) {
@@ -8,17 +8,31 @@ export default class Main extends Component {
     this.state = {
     }
   }
+  
+  removeUserData = () => {
+    storage.remove({ key: 'userData' })
+    this.props.navigation.replace('Login')
+  }
 
   setData = (res) => {
     this.setState({res: res})
   }
 
   render() {
-    return (
-      <ScrollView>
-        <Text>Home</Text>
-        <Logout redirect={this.props.redirect} />
-      </ScrollView>
-    )
+    const data = this.props.route.params.data
+    if (data)
+      return (
+        <ScrollView>
+          <Text>Bienvenido: {data.username}</Text>
+          <TouchableOpacity
+            onPress={this.removeUserData}>
+            <Text>Cerrar Sesión</Text>
+          </TouchableOpacity>
+        </ScrollView>
+      )
+    else
+      return (
+        <Text>Cargando...</Text>
+      );
   }
 }

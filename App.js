@@ -1,11 +1,16 @@
 import React, { Component } from 'react'
 import { SafeAreaView } from 'react-native'
+import { createStackNavigator } from '@react-navigation/stack';
+import { NavigationContainer } from '@react-navigation/native';
 // Componentes
 import storage from './src/Components/storage';
 // Vistas
 import Home from './src/Views/Home';
 import Login from './src/Views/Login';
 import Register from './src/Views/Register';
+import Logout from './src/Components/Logout';
+
+const Stack = createStackNavigator();
 
 export default class App extends Component {
   constructor(props) {
@@ -18,31 +23,19 @@ export default class App extends Component {
   }
 
   componentDidMount() {
+    this.readUserData()
+  }
+
+  readUserData = () => {
     if (!this.state.res) {
       storage.load({ key: 'userData' })
         .then(ret => {
-          this.setState({res: ret})
-          this.redirect('Home')
+          this.setState({ res: ret })
         })
-        .catch(_ => this.redirect('Login'))
+        .catch(_ => {
+          this.setState({ res: null })
+        })
     }
-  }
-
-  isAuth = async () => {
-    await fetch(this.state.endpoint, {
-      method: 'POST',
-      body: JSON.stringify({
-        email: this.state.res.email,
-        password: this.state.res.password,
-      })
-    }).then(res => res.json())
-      .then(res => {
-        if (parseInt(res) !== 0){
-          this.setState({res: res})
-        } else {
-          this.setState({res: null})
-        }
-      });
   }
 
   // Función que es pasada las vistas por props y que toma una "ruta" por parámetro,
@@ -51,22 +44,47 @@ export default class App extends Component {
     this.setState({path: path})
   }
 
-  getView = () => {
-    switch (this.state.path) {
-      case 'Home':
-        return <Home redirect={this.redirect} />
-      case 'Login':
-        return <Login redirect={this.redirect} />
-      case 'Register':
-        return <Register redirect={this.redirect} />
-    }
-  }
-
   render() {
     return (
-      <SafeAreaView>
-        {this.getView()}
-      </SafeAreaView>
+      <NavigationContainer>
+        <Stack.Navigator
+          initialRouteName={'Login'}
+          screenOptions= {{
+          }}>
+
+          <Stack.Screen
+            name='Login'
+            options={{
+              title: 'OakMart',
+            }}
+            component={Login}
+          />
+
+          <Stack.Screen
+            name='Register'
+            options={{
+              title: 'OakMart',
+            }}
+            component={Register}
+          />
+          
+          <Stack.Screen
+            name='Logout'
+            options={{
+              title: 'OakMart',
+            }}
+            component={Logout}
+          />
+
+          <Stack.Screen
+            name='Home'
+            options={{
+              title: 'OakMart',
+            }}
+            component={Home}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
     )
   }
 }

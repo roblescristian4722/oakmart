@@ -18,6 +18,15 @@ export default class Login extends Component {
     }
   }
 
+  componentDidMount() {
+    storage.load({ key: 'userData' })
+      .then(ret => {
+        console.log(ret)
+        this.props.navigation.replace('Home', { data: ret })
+      })
+      .catch(_ => {})
+  }
+
   login = async () => {
     await fetch(this.state.endpoint, {
       method: 'POST',
@@ -35,7 +44,8 @@ export default class Login extends Component {
             key: 'userData',
             data: res
           })
-          this.props.redirect('Home')
+          console.log(res)
+          this.props.navigation.replace('Home', { data: res })
         } else
           this.setState({login_failed: 'Email y/o contraseña incorrectos'})
       });
@@ -51,6 +61,7 @@ export default class Login extends Component {
           validate={this.state.email_regex}
           error_msg='Email no válido'
           throwable={this.state.login_failed}
+          validated={this.enableBtn}
           onChangeText={e => this.setState({email: e, login_failed: null})}/>
 
         <Input
@@ -70,7 +81,9 @@ export default class Login extends Component {
 
         <View style={style.create_account_container}>
           <Text>¿No tienes una cuenta? </Text>
-          <TouchableOpacity style={style.create_account_btn}>
+          <TouchableOpacity
+            style={style.create_account_btn}
+            onPress={() => this.props.navigation.navigate('Register')}>
             <Text style={style.create_account_btn_text}>¡Crea una cuenta ahora!</Text>
           </TouchableOpacity>
         </View>
