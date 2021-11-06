@@ -48,7 +48,8 @@ export default class Login extends Component {
           this.props.navigation.replace('Home', { data: res })
         } else
           this.setState({login_failed: 'Email y/o contraseña incorrectos'})
-      });
+      })
+      .catch(_ => this.setState({login_failed: 'Email y/o contraseña incorrectos'}));
   }
 
   render() {

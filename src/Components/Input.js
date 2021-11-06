@@ -14,21 +14,29 @@ export default class Input extends Component {
     let validate = this.props.validate
     if (validate && e !== '') {
       if (validate.test(e.toLowerCase()) === false)
-        this.setState({ validated: false })
+        this.setState({ validated: false }, _ => 
+          {this.props.is_validated ? this.props.is_validated(false) : null})
       else
-        this.setState({ validated: true })
-    } else
-      this.setState({ validated: true })
+        this.setState({ validated: true }, _ => 
+          {this.props.is_validated ? this.props.is_validated(true) : null})
+    } else if (e === '')
+      this.setState({ validated: false }, _ => 
+          {this.props.is_validated ? this.props.is_validated(false) : null})
+    else
+      this.setState({ validated: true }, _ => 
+          {this.props.is_validated ? this.props.is_validated(true) : null})
   }
 
   changeText = (e) => {
-    this.props.onChangeText(e)
-    this.setState({text: e}, this.validate(e))
+    this.setState({text: e}, _ => {
+      this.props.onChangeText(e)
+      this.validate(e)
+    })
   }
 
   render() {
     return (
-      <View style={[style, this.props.style]}>
+      <View style={[style.container, this.props.style]}>
         <TextInput
           placeholder={this.props.placeholder}
           keyboardType={this.props.keyboardType}

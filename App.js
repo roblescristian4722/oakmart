@@ -6,9 +6,8 @@ import { NavigationContainer } from '@react-navigation/native';
 import storage from './src/Components/storage';
 // Vistas
 import Home from './src/Views/Home';
-import Login from './src/Views/Login';
 import Register from './src/Views/Register';
-import Logout from './src/Components/Logout';
+import Login from './src/Views/Login';
 
 const Stack = createStackNavigator();
 
@@ -68,14 +67,6 @@ export default class App extends Component {
             component={Register}
           />
           
-          <Stack.Screen
-            name='Logout'
-            options={{
-              title: 'OakMart',
-            }}
-            component={Logout}
-          />
-
           <Stack.Screen
             name='Home'
             options={{
