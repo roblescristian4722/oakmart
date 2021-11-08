@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { TextInput, View, Text, StyleSheet } from 'react-native';
+import colors from './colors';
 
 export default class Input extends Component {
   constructor(props) {
@@ -38,6 +39,7 @@ export default class Input extends Component {
     return (
       <View style={[style.container, this.props.style]}>
         <TextInput
+          placeholderTextColor='black'
           placeholder={this.props.placeholder}
           keyboardType={this.props.keyboardType}
           secureTextEntry={this.props.secureTextEntry}
@@ -56,9 +58,19 @@ export default class Input extends Component {
 
 const style = StyleSheet.create({
   container: {
-
+    backgroundColor: colors.text,
+    borderWidth: 1,
+    marginTop: '2%',
+    width: '80%',
+    alignSelf: 'center',
+    borderRadius: 10,
+    paddingLeft: '2%',
   },
   error_msg : {
     color: 'red',
+    marginBottom: '2%',
+    marginTop: '-3%',
+    marginRight: '5%',
+    textAlign: 'right',
   },
 })

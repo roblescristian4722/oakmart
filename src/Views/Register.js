@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
 // Componentes
 import Input from '../Components/Input';
+import colors from '../Components/colors';
 
 export default class Register extends Component {
   constructor(props) {
@@ -27,11 +28,9 @@ export default class Register extends Component {
  
   register = async () => {
     if (this.state.password !== this.state.password_conf) {
-      console.log("NO se puede contraseñas")
       this.setState({ password_failed: 'Las contraseñas no coinciden' })
     } else if (this.state.password_val === true && this.state.email_val === true
       && (this.state.phone === '' || (this.state.phone !== '' && this.state.phone_val === true))) {
-      console.log('CHIII')
       await fetch(this.state.endpoint, {
         method: 'POST',
         body: JSON.stringify({
@@ -42,7 +41,6 @@ export default class Register extends Component {
         })
       }).then(res => res.json())
         .then(res => {
-          console.log(res)
           if (parseInt(res) === 1) {
             alert('Registro realizado de manera exitosa, vuelva al menú e inicie sesión')
             this.props.navigation.replace('Login')
@@ -65,7 +63,8 @@ export default class Register extends Component {
 
   render() {
     return (
-      <View>
+      <ScrollView style={style.container}>
+        <Text style={style.title}>Registro de usuario</Text>
         <Input
           style={style.input}
           placeholder='Nombre de usuario'
@@ -116,19 +115,35 @@ export default class Register extends Component {
           <Text
             style={style.btn_text}>Registrarse</Text>
         </TouchableOpacity>
-      </View>
+      </ScrollView>
     )
   }
 }
 
 const style = StyleSheet.create({
+  container: {
+    backgroundColor: colors.secondaryBg,
+  },
+  title: {
+    fontSize: 28,
+    textAlign: 'center',
+    marginTop: '5%',
+    marginBottom: '5%',
+    color: colors.text,
+  },
   input: {
-    borderWidth: 1,
   },
   btn: {
+    backgroundColor: colors.btnBg,
+    width: '25%',
+    alignSelf: 'center',
+    borderRadius: 10,
     borderWidth: 1,
+    padding: '1%',
+    marginTop: '5%',
   },
   btn_text: {
+    color: colors.text,
     textAlign: 'center',
   },
 })

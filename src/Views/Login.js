@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { ScrollView, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import Input from '../Components/Input';
 import storage from '../Components/storage';
+import colors from '../Components/colors';
 
 export default class Login extends Component {
   constructor(props) {
@@ -54,9 +55,10 @@ export default class Login extends Component {
 
   render() {
     return (
-      <ScrollView>
-        <Text>OakMart</Text>
+      <ScrollView style={style.container}>
+        <Text style={style.title}>OakMart</Text>
         <Input
+          style={style.input}
           placeholder='Email'
           keyboardType='email-address'
           validate={this.state.email_regex}
@@ -81,7 +83,7 @@ export default class Login extends Component {
         </TouchableOpacity>
 
         <View style={style.create_account_container}>
-          <Text>¿No tienes una cuenta? </Text>
+          <Text style={style.create_account_text}>¿No tienes una cuenta? </Text>
           <TouchableOpacity
             style={style.create_account_btn}
             onPress={() => this.props.navigation.navigate('Register')}>
@@ -94,23 +96,43 @@ export default class Login extends Component {
 }
 
 const style = StyleSheet.create({
-  input: {
-    borderWidth: 1,
+  container: {
+    backgroundColor: colors.secondaryBg,
+  },
+  title: {
+    color: colors.text,
+    fontSize: 28,
+    alignSelf: 'center',
+    textAlign: 'center',
+    marginTop: '10%',
+    marginBottom: '10%',
   },
   btn: {
     borderWidth: 1,
+    backgroundColor: colors.btnBg,
+    width: '25%',
+    padding: '1%',
+    alignSelf: 'center',
+    borderRadius: 10,
+    marginTop: '5%',
   },
   btn_text: {
     textAlign: 'center',
+    color: colors.text,
   },
   create_account_container: {
     flexDirection: 'row',
+    marginTop: '3%',
+    alignSelf: 'center',
+    justifyContent: 'center',
+    width: '90%',
+  },
+  create_account_text: {
+    color: colors.text,
   },
   create_account_btn_text: {
-    flex: 1,
-    color: 'blue',
+    color: '#E37E44',
   },
   create_account_btn: {
-    flex: 1,
   }
 })
