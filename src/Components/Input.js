@@ -39,6 +39,7 @@ export default class Input extends Component {
     return (
       <View style={[style.container, this.props.style]}>
         <TextInput
+          style={style.input}
           placeholderTextColor='black'
           placeholder={this.props.placeholder}
           keyboardType={this.props.keyboardType}
@@ -65,6 +66,9 @@ const style = StyleSheet.create({
     alignSelf: 'center',
     borderRadius: 10,
     paddingLeft: '2%',
+  },
+  input: {
+    color: 'black',
   },
   error_msg : {
     color: 'red',
