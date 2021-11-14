@@ -5,7 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 // Componentes
 import storage from './src/Components/storage';
 // Vistas
-import Home from './src/Views/Home';
+import Menu from './src/Views/Menu';
 import Register from './src/Views/Register';
 import Login from './src/Views/Login';
 
@@ -37,8 +37,8 @@ export default class App extends Component {
     }
   }
 
-  // Función que es pasada las vistas por props y que toma una "ruta" por parámetro,
-  // dicha ruta será la que se renderizará
+  // Función que es pasada las vistas por props y que toma una "ruta"
+  // por parámetro, dicha ruta será la que se renderizará
   redirect = (path) => {
     this.setState({path: path})
   }
@@ -49,6 +49,7 @@ export default class App extends Component {
         <Stack.Navigator
           initialRouteName={'Login'}
           screenOptions= {{
+            headerShown: false,
           }}>
 
           <Stack.Screen
@@ -68,11 +69,11 @@ export default class App extends Component {
           />
           
           <Stack.Screen
-            name='Home'
+            name='Menu'
             options={{
               title: 'OakMart',
             }}
-            component={Home}
+            component={Menu}
           />
         </Stack.Navigator>
       </NavigationContainer>

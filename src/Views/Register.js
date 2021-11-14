@@ -3,6 +3,7 @@ import { ScrollView, Text, TouchableOpacity, StyleSheet } from 'react-native';
 // Componentes
 import Input from '../Components/Input';
 import colors from '../Components/colors';
+import ImgPicker from '../Components/ImgPicker';
 
 export default class Register extends Component {
   constructor(props) {
@@ -23,10 +24,16 @@ export default class Register extends Component {
       register_failed: null,
       password_failed: null,
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/register.php',
+      img_url: null,
     }
   }
- 
+
+  getImgUrl = (url) => {
+    this.setState({ img_url: url })
+  }
+
   register = async () => {
+    console.log('Fuera de imgpicker: ', this.state.img_url)
     if (this.state.password !== this.state.password_conf) {
       this.setState({ password_failed: 'Las contraseñas no coinciden' })
     } else if (this.state.password_val === true && this.state.email_val === true
@@ -38,6 +45,7 @@ export default class Register extends Component {
           password: this.state.password,
           username: this.state.username,
           phone: this.state.phone === '' ? null : this.state.phone,
+          image: this.state.img_url,
         })
       }).then(res => res.json())
         .then(res => {
@@ -64,7 +72,11 @@ export default class Register extends Component {
   render() {
     return (
       <ScrollView style={style.container}>
+        
         <Text style={style.title}>Registro de usuario</Text>
+        
+        <ImgPicker style={style.img} getUrl={this.getImgUrl}/>
+
         <Input
           style={style.input}
           placeholder='Nombre de usuario'
@@ -145,5 +157,8 @@ const style = StyleSheet.create({
   btn_text: {
     color: colors.text,
     textAlign: 'center',
+  },
+  img: {
+    alignSelf: 'center',
   },
 })

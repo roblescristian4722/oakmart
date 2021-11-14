@@ -23,7 +23,7 @@ export default class Login extends Component {
     storage.load({ key: 'userData' })
       .then(ret => {
         console.log(ret)
-        this.props.navigation.replace('Home', { data: ret })
+        this.props.navigation.replace('Menu', { data: ret })
       })
       .catch(_ => {})
   }
@@ -46,7 +46,7 @@ export default class Login extends Component {
             data: res
           })
           console.log(res)
-          this.props.navigation.replace('Home', { data: res })
+          this.props.navigation.replace('Menu', { data: res })
         } else
           this.setState({login_failed: 'Email y/o contraseña incorrectos'})
       })
