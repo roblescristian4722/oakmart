@@ -6,7 +6,6 @@ import colors from '../../Components/colors'
 export default class Home extends Component {
   constructor(props) {
     super(props)
-
     this.state = {}
   }
 

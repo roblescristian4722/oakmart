@@ -21,7 +21,7 @@ export default class Settings extends Component {
         <TouchableOpacity
           style={style.logout_btn}
           onPress={this.removeUserData}>
-          <Text>Cerrar Sesión</Text>
+          <Text style={style.logout_text}>Cerrar Sesión</Text>
         </TouchableOpacity>
       </ScrollView>
     )
@@ -30,5 +30,25 @@ export default class Settings extends Component {
 
 const style = StyleSheet.create({
   container: {
+  },
+  welcome_text: {
+    fontSize: 28,
+    textAlign: 'center',
+    alignSelf: 'center',
+    color: colors.text,
+    marginTop: '2%',
+  },
+  logout_btn: {
+    alignSelf: 'center',
+    borderWidth: 1,
+    width: '25%',
+    backgroundColor: '#C84C31',
+    padding: 2,
+    borderRadius: 10,
+    marginTop: '5%',
+  },
+  logout_text: {
+    textAlign: 'center',
+    color: colors.text,
   },
 })

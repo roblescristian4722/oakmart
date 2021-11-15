@@ -18,7 +18,7 @@ export default class ImgPicker extends Component {
   }
 
   uploadToSever = async () => {
-    const image = await fetch(this.state.file_uri)
+    const image = await fetch(this.state.file_uri).catch(err => console.log(err))
     const blob = await image.blob()
     var reader = new FileReader()
     reader.onload = () => {
@@ -54,7 +54,7 @@ export default class ImgPicker extends Component {
     }).then( src => {
       if (src.path !== undefined)
         this.setState({ file_uri: src.path }, () => this.uploadToSever())
-    })
+    }).catch(err => console.log('error: ', err))
   }
 
   render() {

@@ -43,8 +43,9 @@ export default class Input extends Component {
           placeholderTextColor='black'
           placeholder={this.props.placeholder}
           keyboardType={this.props.keyboardType}
-          secureTextEntry={this.props.secureTextEntry}
+          secureTextEntry={this.props.secureTextEntry ? this.props.secureTextEntry : false}
           onChangeText={this.changeText}
+          multiline={this.props.multiline ? this.props.multiline : false}
         />
         {/*Mensaje throwable que tiene prioridad por sobre el mensaje de error*/}
         {this.props.throwable ?
