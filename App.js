@@ -74,6 +74,7 @@ export default class App extends Component {
             }}
             component={Menu}
           />
+
         </Stack.Navigator>
       </NavigationContainer>
     )
