@@ -42,6 +42,7 @@ export default class Input extends Component {
           style={style.input}
           placeholderTextColor='black'
           placeholder={this.props.placeholder}
+          returnKeyType='next'
           keyboardType={this.props.keyboardType}
           secureTextEntry={this.props.secureTextEntry ? this.props.secureTextEntry : false}
           onChangeText={this.changeText}

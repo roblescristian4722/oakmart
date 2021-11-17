@@ -103,6 +103,7 @@ export default class Sell extends Component {
           <Text style={style.picker_text}>Categoría</Text>
           <Picker
             style={style.picker}
+            selectedValue={this.state.category}
             onValueChange={ e => this.setState({ category: e }) }
           >
             <Picker.Item label='Familia y hogar' value='Familia y hogar' />

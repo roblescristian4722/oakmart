@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
-import { ScrollView, TextInput, Text, View, TouchableOpacity, StyleSheet } from 'react-native'
-import storage from '../../Components/storage'
+import { TextInput, Text, View, TouchableOpacity, StyleSheet } from 'react-native'
 import colors from '../../Components/colors'
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import SearchProduct from './SearchProduct';
 
 export default class Home extends Component {
   constructor(props) {
@@ -11,13 +12,24 @@ export default class Home extends Component {
       search: '',
       search_icon: 'search',
       show_search: false,
+      search_res: null,
+      endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/search_product.php?'
     }
     this.search_bar = React.createRef();
   }
   
-  searchProduct = () => {
-    if (this.state.search !== '')
-      this.setState({ show_search: true })
+  searchProduct = async () => {
+    if (this.state.search !== '') {
+      console.log(this.state.search)
+      await fetch(this.state.endpoint + new URLSearchParams({
+        search: this.state.search
+      }))
+      .then(res => res.json())
+        .then(res => {
+          this.setState({ show_search: true, search_res: res })
+      })
+      .catch(res => alert(`Error: ingrese un dato válido (${res})`))
+    }
   }
 
   onChangeText = (e) => {
@@ -29,15 +41,15 @@ export default class Home extends Component {
 
   searchButtonPressed = () => {
     if (this.state.search !== '') {
-      this.setState({ search: '', search_icon: 'search' })
+      this.setState({ search: '', search_icon: 'search', show_search: false })
       this.search_bar.current.clear()
     }
   }
 
   render() {
     return (
-      <ScrollView
-        style={{backgroundColor: colors.secondaryBg}}>
+      <View
+        style={{backgroundColor: colors.secondaryBg, height: '100%'}}>
 
         <View style={style.search_container}>
           <TextInput
@@ -47,9 +59,6 @@ export default class Home extends Component {
             returnKeyType='search'
             onChangeText={this.onChangeText}
             onSubmitEditing={this.searchProduct}/>
-
-          { this.state.show_search === true ? <Text style={{color: 'white'}}>BUSCANDO</Text> : null}
-
           <TouchableOpacity
             onPress={this.searchButtonPressed}
             style={style.search_icon}>
@@ -57,7 +66,11 @@ export default class Home extends Component {
           </TouchableOpacity>
         </View>
 
-      </ScrollView>
+        { this.state.show_search === true
+          ? <SearchProduct data={this.state.search_res}/>
+          : null }
+
+      </View>
     )
   }
 }
