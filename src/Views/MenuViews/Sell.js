@@ -1,6 +1,9 @@
 import React, { Component } from 'react'
-import { ScrollView, Text, StyleSheet, View, TextInput, TouchableOpacity } from 'react-native'
+import { ScrollView, Text, StyleSheet, View, Image, TouchableOpacity } from 'react-native'
 import {Picker} from '@react-native-picker/picker';
+import Carousel from 'react-native-snap-carousel';
+import { Dimensions } from 'react-native'
+const SCREEN_WIDTH = Dimensions.get("window").width;
 
 import ImgPicker from '../../Components/ImgPicker'
 import Input from '../../Components/Input'
@@ -27,10 +30,63 @@ export default class Sell extends Component {
       location_empty: null,
       image: '',
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/publish.php',
+      images: [ null, null, null, null, null ]
     }
   }
 
-  throw_empty = () => {
+  uploadImageToSever = async (uri, product_id, index) => {
+    const image = await fetch(uri).catch((err) => console.log(err))
+    const blob = await image.blob()
+    var reader = new FileReader()
+    reader.onload = () => {
+      var insert_API = 'https://cristianrobles4722.000webhostapp.com/oakmart/upload_photo.php'
+      var data = { img: reader.result }
+      var headers = {
+        'Accept': 'application/json',
+        'Content-Type': 'application.json'
+      }
+      fetch(insert_API, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(data)
+      })
+      .then(res => res.text())
+      .then(res => {
+        fetch('https://cristianrobles4722.000webhostapp.com/oakmart/upload_product_photo.php', {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application.json'
+          },
+          body: JSON.stringify({
+            'image': 'https://cristianrobles4722.000webhostapp.com/' + res,
+            'product_id': product_id
+          })
+        })
+          .then(_ => {
+            let tmp = [...this.state.images]
+            tmp[index] = null
+            this.setState({images: tmp})
+          })
+        .catch(err => console.log("Error al subir imagen: ", err))
+      })
+      .catch( (err) => console.log("error: ", err) )
+    }
+    reader.readAsDataURL(blob)
+  }
+
+  renderImage = ({item, index}) => {
+    return <ImgPicker
+      style={style.empty_img}
+      img={item}
+      getUrl={e => {
+        let tmp = [...this.state.images]
+        tmp[index] = e
+        this.setState({images: tmp})
+      }}/>
+  }
+
+  throwEmpty = () => {
     if (this.state.name === '')
       this.setState({ name_empty: 'Campo requerido' })
     if (this.state.description === '')
@@ -56,22 +112,28 @@ export default class Sell extends Component {
           description: this.state.description,
           price: this.state.price,
           location: this.state.location,
-          user_id: this.props.data.id
+          user_id: this.props.data.id,
         })
       })
       .then(res => res.json())
       .then(res => {
-        if (parseInt(res) === 1)
+        if (parseInt(res) === 0)
+          this.throwEmpty()
+        else {
+          for (let i = 0; i < this.state.images.length; i++) {
+              if (this.state.images[i] !== null)
+                this.uploadImageToSever(this.state.images[i], parseInt(res), i)
+            }
           alert("¡Artículo publicado de manera exitosa!")
-        else
-          this.throw_empty()
+        }
       })
       .catch(err => console.log("Error: ", err))
     } else
-      this.throw_empty()
+      this.throwEmpty()
   }
 
   render() {
+    console.log("urls: ", this.state.images)
     return (
       <ScrollView
         style={{backgroundColor: colors.secondaryBg}}>
@@ -82,6 +144,16 @@ export default class Sell extends Component {
           throwable={this.state.name_empty}
           onChangeText={ e => this.setState({ name: e, name_empty: null }) }
         />
+
+        <View style={style.carousel_container}>
+          <Text style={style.carousel_title}>Imágenes del producto</Text>
+          <Carousel
+            sliderWidth={SCREEN_WIDTH * 0.8}
+            itemWidth={SCREEN_WIDTH * 0.25}
+            data={this.state.images}
+            renderItem={this.renderImage}>
+          </Carousel>
+        </View>
 
         <Input
           placeholder='Estado, País'
@@ -156,8 +228,8 @@ const style = StyleSheet.create({
   picker: {
     backgroundColor: colors.text,
     borderWidth: 1,
-    marginTop: '2%',
     alignSelf: 'center',
+    marginTop: '3%',
     paddingLeft: '2%',
     flex: 3,
   },
@@ -175,12 +247,12 @@ const style = StyleSheet.create({
   },
   input: {
     backgroundColor: colors.text,
+    width: '80%',
     borderWidth: 1,
     marginTop: '2%',
-    width: '80%',
+    paddingLeft: '2%',
     alignSelf: 'center',
     borderRadius: 10,
-    paddingLeft: '2%',
   },
   btn: {
     alignSelf: 'center',
@@ -190,9 +262,31 @@ const style = StyleSheet.create({
     padding: 2,
     borderRadius: 10,
     marginTop: '5%',
+    marginBottom: '5%',
   },
   btn_text: {
     color: colors.text,
     textAlign: 'center',
-  }
+  },
+  img: {
+
+  },
+  carousel_container: {
+    width: '80%',
+    marginTop: '3%',
+    borderRadius: 5,
+    backgroundColor: colors.btnBg,
+    paddingBottom: '2%',
+    alignSelf: 'center',
+  },
+  empty_text: {
+    textAlign: 'center',
+    color: colors.placeholder,
+  },
+  carousel_title: {
+    color: colors.text,
+    textAlign: 'center',
+    fontSize: 20,
+    marginBottom: '2%',
+  },
 })

@@ -1,17 +1,24 @@
 import React, { Component } from 'react'
 import { TouchableOpacity, Image, StyleSheet } from 'react-native'
 import * as ImagePicker from 'react-native-image-crop-picker'
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
+import colors from '../Components/colors'
 
 export default class ImgPicker extends Component {
   constructor(props) {
     super(props)
     this.state = {
       file_uri: null,
-      img_server_path: null,
     }
   }
 
   renderImg = () => {
+    if (this.props.img !== undefined) {
+      return this.props.img === null
+      ? <Ionicons name='add-circle' style={style.empty_img} />
+      : <Image source={{uri: this.state.file_uri}} style={{width: 100, height: 100}}/>
+    }
     return this.state.file_uri === null
       ? <Image source={require('../../imgs/user.png')} style={{width: 100, height: 100}}/>
       : <Image source={{uri: this.state.file_uri}} style={{width: 100, height: 100}}/>
@@ -52,8 +59,10 @@ export default class ImgPicker extends Component {
       height: 200,
       cropping :true,
     }).then( src => {
-      if (src.path !== undefined)
-        this.setState({ file_uri: src.path }, () => this.uploadToSever())
+      if (src.path !== undefined) {
+        this.setState({ file_uri: src.path })
+        this.props.getUrl(this.state.file_uri)
+      }
     }).catch(err => console.log('error: ', err))
   }
 
@@ -72,5 +81,10 @@ const style = StyleSheet.create({
   contaniner: {
     height: 100,
     width: 100,
+  },
+  empty_img: {
+    fontSize: 100,
+    alignSelf: 'center',
+    color: colors.placeholder,
   },
 })

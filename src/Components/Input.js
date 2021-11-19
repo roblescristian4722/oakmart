@@ -63,7 +63,7 @@ const style = StyleSheet.create({
   container: {
     backgroundColor: colors.text,
     borderWidth: 1,
-    marginTop: '2%',
+    marginTop: '3%',
     width: '80%',
     alignSelf: 'center',
     borderRadius: 10,

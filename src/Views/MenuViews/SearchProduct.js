@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import {Dimensions} from 'react-native'
+import { Dimensions } from 'react-native'
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 import colors from '../../Components/colors';
@@ -16,7 +16,6 @@ export default class SearchProduct extends Component {
 
   render() {
     const data = this.props.data
-    console.log(data)
     // Si no hubieron resultados existosos
     if (data === 0)
       return (
@@ -32,9 +31,9 @@ export default class SearchProduct extends Component {
         data={data}
         renderItem={ ({item}) => (
           <TouchableOpacity style={style.item_container}>
-            <View style={style.item_img}>
+            <View style={{flex: 4, alignSelf: 'center'}}>
               {item.image
-                ? <Image source={{uri: item.image}}/>
+                ? <Image source={{uri: item.image}} style={style.item_img}/>
                 : <Ionicons name='eye-off' style={style.item_img_mis}/>}
             </View>
             <View style={style.item_info}>
@@ -84,7 +83,9 @@ const style = StyleSheet.create({
     borderWidth: 0.8,
   },
   item_img: {
-    flex: 4,
+    height: '70%',
+    width: '100%',
+    alignSelf: 'center',
     backgroundColor: colors.placeholder,
   },
   item_info: {
@@ -93,10 +94,10 @@ const style = StyleSheet.create({
     marginLeft: '2%',
   },
   item_img_mis: {
-    padding: 10,
+    backgroundColor: colors.placeholder,
+    padding: '10%',
     fontSize: 0.18 * SCREEN_WIDTH,
     alignSelf: 'center',
-    justifyContent: 'center',
   },
   item_name: {
     fontWeight: 'bold',
