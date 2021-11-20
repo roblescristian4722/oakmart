@@ -131,7 +131,7 @@ const style = StyleSheet.create({
     color: colors.text,
   },
   create_account_btn_text: {
-    color: '#E37E44',
+    color: colors.bg,
   },
   create_account_btn: {
   }

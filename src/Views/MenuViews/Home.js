@@ -22,7 +22,8 @@ export default class Home extends Component {
     if (this.state.search !== '') {
       console.log(this.state.search)
       await fetch(this.state.endpoint + new URLSearchParams({
-        search: this.state.search
+        search: this.state.search,
+        order: 'rating',
       }))
       .then(res => res.json())
         .then(res => {
@@ -67,7 +68,7 @@ export default class Home extends Component {
         </View>
 
         { this.state.show_search === true
-          ? <SearchProduct data={this.state.search_res}/>
+          ? <SearchProduct data={this.state.search_res} search={this.state.search}/>
           : null }
 
       </View>

@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Dimensions } from 'react-native'
+import { Picker } from '@react-native-picker/picker';
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 import colors from '../../Components/colors';
@@ -10,8 +11,27 @@ export default class SearchProduct extends Component {
   constructor(props) {
     super(props)
     this.state = {
-
+      order: 'rating',
+      data: null,
+      endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/search_product.php?',
     }
+  }
+
+  componentDidMount() {
+    if (this.state.order == 'rating')
+      this.setState({ data: this.props.data })
+  }
+
+  searchProduct = async () => {
+    await fetch(this.state.endpoint + new URLSearchParams({
+      search: this.props.search,
+      order: this.state.order
+    }))
+    .then(res => res.json())
+      .then(res => {
+        this.setState({ data: res })
+    })
+    .catch(res => alert(`Error: ingrese un dato válido (${res})`))
   }
 
   render() {
@@ -26,32 +46,50 @@ export default class SearchProduct extends Component {
         </View>
       )
     return (
-      <FlatList
-        style={style.res}
-        data={data}
-        renderItem={ ({item}) => (
-          <TouchableOpacity style={style.item_container}>
-            <View style={{flex: 4, alignSelf: 'center'}}>
-              {item.image
-                ? <Image source={{uri: item.image}} style={style.item_img}/>
-                : <Ionicons name='eye-off' style={style.item_img_mis}/>}
-            </View>
-            <View style={style.item_info}>
-                <Text style={style.item_name}>
-                  { item.name }
-                </Text>
-                <Text style={style.item_price}>
-                  ${ item.price }
-                </Text>
-                <Text style={style.item_rating}>
-                  calificación de clientes: { item.rating }
-                </Text>
-                <Text style={style.item_category}>
-                  { item.category }
-                </Text>
-            </View>
-          </TouchableOpacity>
-      )}/>
+      <View style={style.container}>
+        <View style={style.picker_container}>
+          <Text style={style.picker_text}>
+            Ordernar por 
+          </Text>
+          <View style={style.picker}>
+            <Picker
+              selectedValue={this.state.order}
+              onValueChange={ e => this.setState({ order: e }, () => this.searchProduct()) }
+              >
+              <Picker.Item label='Rating' value='rating' />
+              <Picker.Item label='Menor precio' value='lower_price' />
+              <Picker.Item label='Mayor precio' value='higher_price' />
+              <Picker.Item label='Popularidad' value='popularity' />
+            </Picker>
+          </View>
+        </View>
+        <FlatList
+          style={style.res}
+          data={this.state.data}
+          renderItem={ ({item}) => (
+            <TouchableOpacity style={style.item_container}>
+              <View style={{flex: 4, alignSelf: 'center'}}>
+                {item.image
+                  ? <Image source={{uri: item.image}} style={style.item_img}/>
+                  : <Ionicons name='eye-off' style={style.item_img_mis}/>}
+              </View>
+              <View style={style.item_info}>
+                  <Text style={style.item_name}>
+                    { item.name }
+                  </Text>
+                  <Text style={style.item_price}>
+                    ${ item.price }
+                  </Text>
+                  <Text style={style.item_rating}>
+                    calificación de clientes: { item.rating }
+                  </Text>
+                  <Text style={style.item_category}>
+                    { item.category }
+                  </Text>
+              </View>
+            </TouchableOpacity>
+        )}/>
+      </View>
     )
   }
 }
@@ -106,5 +144,26 @@ const style = StyleSheet.create({
   item_price: {
     fontSize: 18,
     fontWeight: 'bold',
+  },
+  picker_container: {
+    height: '11%',
+    width: '60%',
+    paddingLeft: '2%',
+    marginTop: '3%',
+    marginLeft: '35%',
+    flexDirection: 'row',
+  },
+  picker_text: {
+    color: colors.text,
+    alignSelf: 'center',
+    textAlign: 'center',
+    flex: 2.5,
+  },
+  picker: {
+    borderWidth: 1,
+    borderRadius: 10,
+    flex: 7,
+    alignSelf: 'center',
+    backgroundColor: colors.bg,
   },
 })

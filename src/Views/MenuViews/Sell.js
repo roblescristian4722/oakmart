@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { ScrollView, Text, StyleSheet, View, Image, TouchableOpacity } from 'react-native'
+import { ScrollView, Text, StyleSheet, View, TouchableOpacity } from 'react-native'
 import {Picker} from '@react-native-picker/picker';
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions } from 'react-native'
