@@ -14,6 +14,7 @@ export default class SearchProduct extends Component {
       order: 'rating',
       data: null,
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/search_product.php?',
+      img_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_images.php?',
     }
   }
 
@@ -28,9 +29,24 @@ export default class SearchProduct extends Component {
       order: this.state.order
     }))
     .then(res => res.json())
-      .then(res => {
-        this.setState({ data: res })
-    })
+    .then(res => this.setState({ data: res }, () => {
+        let data = [...this.state.data];
+        console.log(data, data[0].id)
+        for (let i = 0; i < data.length && data.length !== null; i++) {
+          fetch(this.state.img_endpoint + new URLSearchParams({
+            product_id: data[i].id
+          }))
+          .then(res => res.json())
+          .then(res => {
+            console.log("res: ", res)
+            if (res[0] !== undefined) {
+              data[i].images = res
+              this.setState({ data: data })
+            }
+          })
+          .catch(err => console.log(`error al obtener las imágenes (${err})`))
+        }
+      }))
     .catch(res => alert(`Error: ingrese un dato válido (${res})`))
   }
 
@@ -69,8 +85,8 @@ export default class SearchProduct extends Component {
           renderItem={ ({item}) => (
             <TouchableOpacity style={style.item_container}>
               <View style={{flex: 4, alignSelf: 'center'}}>
-                {item.image
-                  ? <Image source={{uri: item.image}} style={style.item_img}/>
+                {item.images
+                  ? <Image source={{uri: item.images[0]}} style={style.item_img}/>
                   : <Ionicons name='eye-off' style={style.item_img_mis}/>}
               </View>
               <View style={style.item_info}>
@@ -146,7 +162,6 @@ const style = StyleSheet.create({
     fontWeight: 'bold',
   },
   picker_container: {
-    height: '11%',
     width: '60%',
     paddingLeft: '2%',
     marginTop: '3%',

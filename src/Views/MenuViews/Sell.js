@@ -133,7 +133,6 @@ export default class Sell extends Component {
   }
 
   render() {
-    console.log("urls: ", this.state.images)
     return (
       <ScrollView
         style={{backgroundColor: colors.secondaryBg}}>

@@ -13,7 +13,8 @@ export default class Home extends Component {
       search_icon: 'search',
       show_search: false,
       search_res: null,
-      endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/search_product.php?'
+      endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/search_product.php?',
+      img_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_images.php?',
     }
     this.search_bar = React.createRef();
   }
@@ -26,9 +27,22 @@ export default class Home extends Component {
         order: 'rating',
       }))
       .then(res => res.json())
-        .then(res => {
-          this.setState({ show_search: true, search_res: res })
-      })
+      .then(res => this.setState({ show_search: true, search_res: res }, () => {
+        let data = [...this.state.search_res];
+        for (let i = 0; i < data.length && data.length !== null; i++) {
+          fetch(this.state.img_endpoint + new URLSearchParams({
+            product_id: data[i].id
+          }))
+          .then(res => res.json())
+          .then(res => {
+            if (res[0] !== undefined) {
+              data[i].images = res
+              this.setState({ search_res: data })
+            }
+          })
+          .catch(err => console.log(`error al obtener las imágenes (${err})`))
+        }
+      }))
       .catch(res => alert(`Error: ingrese un dato válido (${res})`))
     }
   }
