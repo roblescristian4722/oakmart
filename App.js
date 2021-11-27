@@ -7,6 +7,7 @@ import storage from './src/Components/storage';
 import Menu from './src/Views/Menu';
 import Register from './src/Views/Register';
 import Login from './src/Views/Login';
+import Product from './src/Views/MenuViews/Product'
 
 const Stack = createStackNavigator();
 
@@ -74,6 +75,14 @@ export default class App extends Component {
             }}
             component={Menu}
           />
+  
+          <Stack.Screen
+            name='Product'
+            options={{
+              title: 'OakMart',
+            }}
+            component={Product}
+            />
 
         </Stack.Navigator>
       </NavigationContainer>

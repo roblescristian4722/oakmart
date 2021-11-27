@@ -28,19 +28,21 @@ export default class Home extends Component {
       }))
       .then(res => res.json())
       .then(res => this.setState({ show_search: true, search_res: res }, () => {
-        let data = [...this.state.search_res];
-        for (let i = 0; i < data.length && data.length !== null; i++) {
-          fetch(this.state.img_endpoint + new URLSearchParams({
-            product_id: data[i].id
-          }))
-          .then(res => res.json())
-          .then(res => {
-            if (res[0] !== undefined) {
-              data[i].images = res
-              this.setState({ search_res: data })
-            }
-          })
-          .catch(err => console.log(`error al obtener las imágenes (${err})`))
+        if (parseInt(res) !== 0) {
+          let data = [...this.state.search_res];
+          for (let i = 0; i < data.length && data.length !== null; i++) {
+            fetch(this.state.img_endpoint + new URLSearchParams({
+              product_id: data[i].id
+            }))
+            .then(res => res.json())
+            .then(res => {
+              if (res[0] !== undefined) {
+                data[i].images = res
+                this.setState({ search_res: data })
+              }
+            })
+            .catch(err => console.log(`error al obtener las imágenes (${err})`))
+          }
         }
       }))
       .catch(res => alert(`Error: ingrese un dato válido (${res})`))
@@ -82,7 +84,10 @@ export default class Home extends Component {
         </View>
 
         { this.state.show_search === true
-          ? <SearchProduct data={this.state.search_res} search={this.state.search}/>
+          ? <SearchProduct
+              data={this.state.search_res}
+              search={this.state.search}
+              navigation={this.props.navigation}/>
           : null }
 
       </View>

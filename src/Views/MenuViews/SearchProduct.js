@@ -26,19 +26,17 @@ export default class SearchProduct extends Component {
   searchProduct = async () => {
     await fetch(this.state.endpoint + new URLSearchParams({
       search: this.props.search,
-      order: this.state.order
+      order: this.state.order,
     }))
     .then(res => res.json())
     .then(res => this.setState({ data: res }, () => {
         let data = [...this.state.data];
-        console.log(data, data[0].id)
         for (let i = 0; i < data.length && data.length !== null; i++) {
           fetch(this.state.img_endpoint + new URLSearchParams({
             product_id: data[i].id
           }))
           .then(res => res.json())
           .then(res => {
-            console.log("res: ", res)
             if (res[0] !== undefined) {
               data[i].images = res
               this.setState({ data: data })
@@ -52,8 +50,8 @@ export default class SearchProduct extends Component {
 
   render() {
     const data = this.props.data
-    // Si no hubieron resultados existosos
-    if (data === 0)
+    // Si no hubieron resultados exitosos
+    if (data === 0 || data === undefined)
       return (
         <View style={style.no_res}>
           <Text style={style.no_res_text}>
@@ -83,7 +81,9 @@ export default class SearchProduct extends Component {
           style={style.res}
           data={this.state.data}
           renderItem={ ({item}) => (
-            <TouchableOpacity style={style.item_container}>
+            <TouchableOpacity
+              style={style.item_container}
+              onPress={() => {this.props.navigation.navigate('Product', { data: item })}}>
               <View style={{flex: 4, alignSelf: 'center'}}>
                 {item.images
                   ? <Image source={{uri: item.images[0]}} style={style.item_img}/>

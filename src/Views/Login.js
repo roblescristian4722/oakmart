@@ -22,7 +22,6 @@ export default class Login extends Component {
   componentDidMount() {
     storage.load({ key: 'userData' })
       .then(ret => {
-        console.log(ret)
         this.props.navigation.replace('Menu', { data: ret })
       })
       .catch(_ => {})
@@ -45,7 +44,6 @@ export default class Login extends Component {
             key: 'userData',
             data: res
           })
-          console.log(res)
           this.props.navigation.replace('Menu', { data: res })
         } else
           this.setState({login_failed: 'Email y/o contraseña incorrectos'})

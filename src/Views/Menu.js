@@ -60,7 +60,7 @@ export default class Main extends Component {
           }
         })}
       >
-        <Tab.Screen name='Inicio' component={Home} />
+        <Tab.Screen name='Inicio' children={() => <Home navigation={this.props.navigation}/> }/>
         <Tab.Screen name='Vender' children={() => <Sell data={data}
                                                     navigation={this.props.navigation}/>} />
         <Tab.Screen name='Carrito de compras' component={Cart} />
