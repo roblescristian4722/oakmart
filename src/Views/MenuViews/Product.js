@@ -5,6 +5,7 @@ import { Dimensions } from 'react-native'
 const SCREEN_WIDTH = Dimensions.get("window").width;
 import AsyncStorage from '@react-native-community/async-storage';
 import Storage from 'react-native-storage';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const storage = new Storage({
   storageBackend: AsyncStorage,
@@ -62,13 +63,15 @@ export default class Product extends Component {
             {this.data.name}
           </Text>
 
-          <View style={style.carousel}>
-            <Carousel
-              sliderWidth={SCREEN_WIDTH * 0.8}
-              itemWidth={SCREEN_WIDTH * 0.5}
-              data={this.data.images}
-              renderItem={this.renderItem}/>
-          </View>
+          {this.data.images !== undefined
+          ? <View style={style.carousel}>
+              <Carousel
+                sliderWidth={SCREEN_WIDTH * 0.8}
+                itemWidth={SCREEN_WIDTH * 0.5}
+                data={this.data.images}
+                renderItem={this.renderItem}/>
+            </View>
+          : <Ionicons name='eye-off' style={style.item_img_mis}/>}
 
           <Text style={style.category}>
             Categoría: {this.data.category}

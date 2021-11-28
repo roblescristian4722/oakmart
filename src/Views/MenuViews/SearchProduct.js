@@ -1,8 +1,8 @@
 import React, { Component } from 'react'
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Dimensions } from 'react-native'
 import { Picker } from '@react-native-picker/picker';
+import { Dimensions } from 'react-native'
 const SCREEN_WIDTH = Dimensions.get("window").width;
 
 import colors from '../../Components/colors';
