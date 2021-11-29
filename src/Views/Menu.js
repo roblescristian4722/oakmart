@@ -6,7 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 // Views
 import Home from '../Views/MenuViews/Home';
 import Settings from '../Views/MenuViews/Settings';
-import Cart from '../Views/MenuViews/Cart';
+import CartMenu from '../Views/MenuViews/CartMenu';
 import Sell from '../Views/MenuViews/Sell';
 
 // Custom components
@@ -63,7 +63,7 @@ export default class Main extends Component {
         <Tab.Screen name='Inicio' children={() => <Home navigation={this.props.navigation}/> }/>
         <Tab.Screen name='Vender' children={() => <Sell data={data}
                                                     navigation={this.props.navigation}/>} />
-        <Tab.Screen name='Carrito de compras' component={Cart} />
+        <Tab.Screen name='Carrito de compras' component={CartMenu} />
         <Tab.Screen name='Configuraciones' children={() => <Settings
                                                               data={data}
                                                               navigation={this.props.navigation}/>} />

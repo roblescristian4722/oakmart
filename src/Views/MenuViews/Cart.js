@@ -132,12 +132,11 @@ export default class Cart extends Component {
         {item.images
         ? <Image source={{uri: item.images}} style={style.item_img}/>
         :<Ionicons name='eye-off' style={style.item_img_mis}/>}
-        <Text>
-          {item.name}
-        </Text>
-        <Text>
-          {item.price}
-        </Text>
+        <View style={style.item_info_container}>
+          <Text style={style.item_text}>{item.name}</Text>
+          <Text style={style.item_text}>${item.price}</Text>
+          <Text style={style.item_text}>Cantidad: {item.pieces}</Text>
+        </View>
         <TouchableOpacity
           onPress={() => this.removeProduct(item.cart_id)}
           style={style.cancel_btn}>
@@ -215,12 +214,16 @@ const style = StyleSheet.create({
   },
   item_container: {
     borderWidth: 1,
+    flexDirection: 'row',
   },
   cancel_btn: {
     backgroundColor: colors.bg,
     width: '6%',
     borderRadius: 10,
     borderWidth: 1,
+    position: 'absolute',
+    left: '90%',
+    top: '3%',
   },
   cancel_text: {
     fontSize: 14,
@@ -231,11 +234,12 @@ const style = StyleSheet.create({
   item_img: {
     height: 100,
     width: 100,
+    alignSelf: 'center',
   },
   item_img_mis: {
     backgroundColor: colors.placeholder,
-    padding: '10%',
-    fontSize: 0.18 * SCREEN_WIDTH,
+    padding: '8%',
+    fontSize: 0.10 * SCREEN_WIDTH,
     alignSelf: 'center',
   },
   no_res: {
@@ -266,5 +270,12 @@ const style = StyleSheet.create({
     fontWeight: 'bold',
     padding: '2%',
     fontSize: 18,
+  },
+  item_info_container: {
+    padding: '3%',
+  },
+  item_text: {
+    fontSize: 16,
+    color: 'black',
   }
 })
