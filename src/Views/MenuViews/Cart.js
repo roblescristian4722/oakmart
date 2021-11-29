@@ -37,8 +37,10 @@ export default class Cart extends Component {
   }
 
   getCartProducts = async () => {
+    // Se obtienen los datos del usuario loggeado
     await storage.load({ key: 'userData' })
       .then( user => {
+        // Se obtienen los productos del carrito del usuario
         fetch(this.state.endpoint + new URLSearchParams({
           user_id: user.id
         }))
@@ -51,6 +53,7 @@ export default class Cart extends Component {
               let product_id = []
               for (let i of res)
                 product_id = [...product_id, parseInt(i.product_id)]
+              // se obtiene la información de cada unos de los productos del carrito
               fetch(this.state.sec_endpoint, {
                 method: 'POST',
                 headers: {
@@ -69,6 +72,7 @@ export default class Cart extends Component {
                   }
                   data = res
                   for(let i = 0; i < data.length; i++) {
+                    // Se obtienen las imágenes de los productos
                     fetch(this.state.img_endpoint + new URLSearchParams({
                       product_id: data[i].id,
                     }))

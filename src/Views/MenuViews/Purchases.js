@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Text, FlatList, StyleSheet } from 'react-native'
+import { View, Image, Text, FlatList, StyleSheet, RefreshControl } from 'react-native'
 
 import colors from '../../Components/colors'
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -20,6 +20,7 @@ export default class Purchases extends Component {
     this.state = {
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/purchases.php?',
       prod_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_by_id.php?',
+      img_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_images.php?',
       data: null,
     }
   }
@@ -54,9 +55,20 @@ export default class Purchases extends Component {
                 .then(res => res.json())
                 .then(res => {
                   if (parseInt(res) !== 0)
-                    for (let i = 0; i < data.length; i++)
+                    for (let i = 0; i < data.length; i++) {
                       data[i].product_info = res[i]
-                  this.setState({ data: data })
+                      fetch(this.state.img_endpoint + new URLSearchParams({
+                        product_id: data[i].product_id
+                      }))
+                        .then(res => res.json())
+                        .then(res => {
+                          if (res[0] !== undefined)
+                            data[i].product_info.images = res[0]
+                          this.setState({ data: data })
+                        })
+                        .catch(err => console.log(`Error al obtener imágenes (${err})`))
+                    }
+                  // this.setState({ data: data })
                 })
                 .catch(err => console.log(`Error al obtener datos del producto (${err})`))
             }
@@ -68,8 +80,8 @@ export default class Purchases extends Component {
   renderItem = ({item}) => {
     return (
       <View style={style.item_container}>
-        {item.images
-        ? <Image source={{uri: item.images}} style={style.item_img}/>
+        {item.product_info.images
+        ? <Image source={{uri: item.product_info.images}} style={style.item_img}/>
         :<Ionicons name='eye-off' style={style.item_img_mis}/>}
         <View style={style.item_info_container}>
           <Text style={style.item_text}>{item.product_info.name}</Text>
@@ -87,7 +99,16 @@ export default class Purchases extends Component {
           <FlatList
             style={style.list}
             data={this.state.data}
-            renderItem={this.renderItem}/>
+            renderItem={this.renderItem}
+            refreshControl={
+              <RefreshControl
+                refreshing={this.state.refreshing}
+                onRefresh={() => {
+                  this.getPurchases()
+                  this.setState({ refresh: true })
+                  setTimeout(() => this.setState({ refreshing: false }), 2000)
+              }}/>
+            }/>
         </View>
       )
     else
