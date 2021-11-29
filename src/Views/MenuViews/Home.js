@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { TextInput, Text, View, TouchableOpacity, StyleSheet } from 'react-native'
+import { TextInput, FlatList, Text, View, TouchableOpacity, StyleSheet } from 'react-native'
 import colors from '../../Components/colors'
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -88,7 +88,8 @@ export default class Home extends Component {
               data={this.state.search_res}
               search={this.state.search}
               navigation={this.props.navigation}/>
-          : null }
+          : <FlatList />
+        }
 
       </View>
     )

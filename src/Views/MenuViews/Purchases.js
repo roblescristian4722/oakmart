@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { View, Image, Text, FlatList, StyleSheet, RefreshControl } from 'react-native'
+import { View, Image, Text, FlatList, StyleSheet, ScrollView, RefreshControl } from 'react-native'
 
 import colors from '../../Components/colors'
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -29,52 +29,57 @@ export default class Purchases extends Component {
     this.getPurchases()
   }
 
-  getPurchases = async () => {
-    await storage.load({ key: 'userData' })
-      .then(ret => {
-        fetch(this.state.endpoint + new URLSearchParams({
-          user_id: ret.id
-        }))
-          .then(res => res.json())
-          .then(res => {
-            let product_id = []
-            if (parseInt(res) !== 0) {
-              let data = res
-              for (let i of res)
-                product_id = [...product_id, parseInt(i.product_id)]
-              fetch(this.state.prod_endpoint, {
-                method: 'POST',
-                headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application.json'
-                },
-                body: JSON.stringify({
-                  'product_id': product_id
+  getPurchases = () => {
+    this.setState({ data: null }, () => {
+      // Se obtienen los datos del usuario
+      storage.load({ key: 'userData' })
+        .then(ret => {
+          // Se obtienen las compras realizadas por el usuario
+          fetch(this.state.endpoint + new URLSearchParams({
+            user_id: ret.id
+          }))
+            .then(res => res.json())
+            .then(res => {
+              let product_id = []
+              if (parseInt(res) !== 0) {
+                let data = res
+                for (let i of res)
+                  product_id = [...product_id, parseInt(i.product_id)]
+                // Se obtiene la información de cada producto
+                fetch(this.state.prod_endpoint, {
+                  method: 'POST',
+                  headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application.json'
+                  },
+                  body: JSON.stringify({
+                    'product_id': product_id
+                  })
                 })
-              })
-                .then(res => res.json())
-                .then(res => {
-                  if (parseInt(res) !== 0)
-                    for (let i = 0; i < data.length; i++) {
-                      data[i].product_info = res[i]
-                      fetch(this.state.img_endpoint + new URLSearchParams({
-                        product_id: data[i].product_id
-                      }))
-                        .then(res => res.json())
-                        .then(res => {
-                          if (res[0] !== undefined)
-                            data[i].product_info.images = res[0]
-                          this.setState({ data: data })
-                        })
-                        .catch(err => console.log(`Error al obtener imágenes (${err})`))
-                    }
-                  // this.setState({ data: data })
-                })
-                .catch(err => console.log(`Error al obtener datos del producto (${err})`))
-            }
-          })
-          .catch(err => `Error al obtener historial (${err})`)
-      })
+                  .then(res => res.json())
+                  .then(res => {
+                    if (parseInt(res) !== 0)
+                      for (let i = 0; i < data.length; i++) {
+                        data[i].product_info = res[i]
+                        // Se obtiene la imagen del producto
+                        fetch(this.state.img_endpoint + new URLSearchParams({
+                          product_id: data[i].product_id
+                        }))
+                          .then(res => res.json())
+                          .then(res => {
+                            if (res[0] !== undefined)
+                              data[i].product_info.images = res[0]
+                            this.setState({ data: data })
+                          })
+                          .catch(err => console.log(`Error al obtener imágenes (${err})`))
+                      }
+                  })
+                  .catch(err => console.log(`Error al obtener datos del producto (${err})`))
+              }
+            })
+            .catch(err => `Error al obtener historial (${err})`)
+        })
+    })
   }
 
   renderItem = ({item}) => {
@@ -113,16 +118,41 @@ export default class Purchases extends Component {
       )
     else
       return (
-        <View>
-          <Text>
-            Aún no ha realizado compras
-          </Text>
-        </View>
+        <ScrollView
+          style={style.container}
+          refreshControl = {
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={() => {
+                this.getPurchases()
+                this.setState({ refresh: true })
+                setTimeout(() => this.setState({ refresing: false }), 2000)
+              }}/>
+          }>
+          <View style={style.no_res}>
+            <Text style={style.no_res_text}>
+              Aún no ha realizado compras
+            </Text>
+          </View>
+        </ScrollView>
       )
   }
 }
 
 const style = StyleSheet.create({
+  no_res: {
+    width: '90%',
+    backgroundColor: 'white',
+    alignSelf: 'center',
+    marginTop: '45%',
+    padding: '4%',
+    borderRadius: 30,
+  },
+  no_res_text: {
+    fontSize: 24,
+    textAlign: 'center',
+    color: 'black',
+  },
   container: {
     height: '100%',
     backgroundColor: colors.secondaryBg,

@@ -84,7 +84,7 @@ export default class SearchProduct extends Component {
             <TouchableOpacity
               style={style.item_container}
               onPress={() => {this.props.navigation.navigate('Product', { data: item })}}>
-              <View style={{flex: 4, alignSelf: 'center'}}>
+              <View style={{flex: 3, alignSelf: 'center'}}>
                 {item.images
                   ? <Image source={{uri: item.images[0]}} style={style.item_img}/>
                   : <Ionicons name='eye-off' style={style.item_img_mis}/>}
@@ -137,13 +137,13 @@ const style = StyleSheet.create({
     borderWidth: 0.8,
   },
   item_img: {
-    height: '70%',
-    width: '100%',
+    height: 100,
+    width: 100,
     alignSelf: 'center',
     backgroundColor: colors.placeholder,
   },
   item_info: {
-    flex: 10,
+    flex: 8,
     padding: '2%',
     marginLeft: '2%',
   },

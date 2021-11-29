@@ -140,6 +140,7 @@ export default class Cart extends Component {
           <Text style={style.item_text}>{item.name}</Text>
           <Text style={style.item_text}>${item.price}</Text>
           <Text style={style.item_text}>Cantidad: {item.pieces}</Text>
+          <Text style={style.item_text}>Total: ${item.pieces * item.price}</Text>
         </View>
         <TouchableOpacity
           onPress={() => this.removeProduct(item.cart_id)}
