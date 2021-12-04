@@ -189,24 +189,28 @@ const style = StyleSheet.create({
   },
   plus: {
     borderWidth: 1,
-    flex: 1,
+    flex: 3,
     borderRadius: 5,
   },
   plus_text: {
     textAlign: 'center',
+    color: 'black',
   },
   minus: {
     borderRadius: 5,
     borderWidth: 1,
-    flex: 1,
+    flex: 3,
   },
   minus_text: {
     textAlign: 'center',
+    fontWeight: 'bold',
+    color: 'black',
   },
   pieces: {
     flex: 3,
     textAlign: 'center',
     marginLeft: '3%',
     marginRight: '3%',
+    color: 'black',
   }
 })

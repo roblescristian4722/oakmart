@@ -18,33 +18,37 @@ export default class SearchProduct extends Component {
   }
 
   componentDidMount() {
+    this.searchProduct()
     if (this.state.order == 'rating')
       this.setState({ data: this.props.data })
   }
 
   searchProduct = async () => {
-    await fetch(this.state.endpoint + new URLSearchParams({
-      search: this.props.search,
-      order: this.state.order,
-    }))
-    .then(res => res.json())
-    .then(res => this.setState({ data: res }, () => {
-        let data = [...this.state.data];
-        for (let i = 0; i < data.length && data.length !== null; i++) {
-          fetch(this.state.img_endpoint + new URLSearchParams({
-            product_id: data[i].id
-          }))
-          .then(res => res.json())
-          .then(res => {
-            if (res[0] !== undefined) {
-              data[i].images = res
-              this.setState({ data: data })
-            }
-          })
-          .catch(err => console.log(`error al obtener las imágenes (${err})`))
-        }
+    try {
+      const res = await fetch(this.state.endpoint + new URLSearchParams({
+        search: this.props.search,
+        order: this.state.order,
       }))
-    .catch(res => alert(`Error: ingrese un dato válido (${res})`))
+      const data = await res.json()
+      if (parseInt(data) !== 0) {
+          for (let i = 0; i < data.length; i++) {
+            try{
+              const img = await fetch(this.state.img_endpoint + new URLSearchParams({
+                product_id: data[i].id
+              }))
+              const img_res = await img.json()
+                if (img_res[0] !== undefined) {
+                  data[i].images = img_res
+                }
+            } catch {
+              err => console.log(`error al obtener las imágenes (${err})`)
+            }
+          }
+          this.setState({ data: data })
+          }
+    } catch{
+      res => alert(`Error: ingrese un dato válido (${res})`)
+    }
   }
 
   renderItem = ({item}) => {

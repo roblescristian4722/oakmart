@@ -29,30 +29,28 @@ export default class Home extends Component {
   
   searchProduct = async () => {
     if (this.state.search !== '') {
-      console.log(this.state.search)
       await fetch(this.state.endpoint + new URLSearchParams({
         search: this.state.search,
         order: 'rating',
       }))
       .then(res => res.json())
-      .then(res => this.setState({ show_search: true, search_res: res }, () => {
+      .then(res => {
         if (parseInt(res) !== 0) {
-          let data = [...this.state.search_res];
-          for (let i = 0; i < data.length && data.length !== null; i++) {
+          let data = [...res];
+          for (let i = 0; i < data.length; i++) {
             fetch(this.state.img_endpoint + new URLSearchParams({
               product_id: data[i].id
             }))
             .then(res => res.json())
             .then(res => {
-              if (res[0] !== undefined) {
+              if (res[0] !== undefined)
                 data[i].images = res
-                this.setState({ search_res: data })
-              }
             })
             .catch(err => console.log(`error al obtener las imágenes (${err})`))
           }
+          this.setState({ show_search: true })
         }
-      }))
+      })
       .catch(res => alert(`Error: ingrese un dato válido (${res})`))
     }
   }
@@ -149,19 +147,22 @@ export default class Home extends Component {
           </TouchableOpacity>
         </View>
 
-        <OrderByPicker
-          value={this.state.order}
-          onValueChange={this.pickerChangeValue}/>
-
       { this.state.show_search === true
           ? <SearchProduct
               data={this.state.search_res}
               search={this.state.search}
               navigation={this.props.navigation}/>
-          : <FlatList
-            data={this.state.home_data}
-            style={style.res}
-            renderItem={ this.renderHomeProducts }/>
+          :
+            <View>
+              <OrderByPicker
+                value={this.state.order}
+                onValueChange={this.pickerChangeValue}/>
+
+              <FlatList
+                data={this.state.home_data}
+                style={style.res}
+                renderItem={ this.renderHomeProducts }/>
+            </View>
         }
 
       </View>
@@ -174,6 +175,7 @@ const style = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
     marginTop: '4%',
+    marginBottom: '10%',
     flexGrow: 0,
   },
   search_container: {
