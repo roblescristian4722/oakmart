@@ -1,11 +1,10 @@
 import React, { Component } from 'react'
 import { FlatList, StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { Picker } from '@react-native-picker/picker';
-import { Dimensions } from 'react-native'
-const SCREEN_WIDTH = Dimensions.get("window").width;
 
 import colors from '../../Components/colors';
+import globalStyle from '../../Components/globalStyle'
+import OrderByPicker from './OrderByPicker'
 
 export default class SearchProduct extends Component {
   constructor(props) {
@@ -48,6 +47,40 @@ export default class SearchProduct extends Component {
     .catch(res => alert(`Error: ingrese un dato válido (${res})`))
   }
 
+  renderItem = ({item}) => {
+    return (
+      <TouchableOpacity
+        style={globalStyle.item_container}
+        onPress={() => {this.props.navigation.navigate('Product', { data: item })}}>
+        <View style={globalStyle.item_img_container}>
+          {item.images
+            ? <Image source={{uri: item.images[0]}} style={globalStyle.item_img}/>
+            : <Ionicons name='eye-off' style={globalStyle.item_img_mis}/>}
+        </View>
+        <View style={globalStyle.item_info}>
+            <Text style={globalStyle.item_name}>
+              { item.name }
+            </Text>
+            <Text style={globalStyle.item_price}>
+              ${ item.price }
+            </Text>
+            <Text style={globalStyle.item_extra}>
+              calificación de clientes: { item.rating }
+            </Text>
+            <Text style={globalStyle.item_extra}>
+              { item.category }
+            </Text>
+        </View>
+      </TouchableOpacity>
+    )
+  }
+
+  pickerChangeValue = (e) => {
+    this.setState({order: e}, async () => {
+      await this.searchProduct()
+    })
+  }
+
   render() {
     const data = this.props.data
     // Si no hubieron resultados exitosos
@@ -61,50 +94,13 @@ export default class SearchProduct extends Component {
       )
     return (
       <View style={style.container}>
-        <View style={style.picker_container}>
-          <Text style={style.picker_text}>
-            Ordernar por 
-          </Text>
-          <View style={style.picker}>
-            <Picker
-              selectedValue={this.state.order}
-              onValueChange={ e => this.setState({ order: e }, () => this.searchProduct()) }
-              >
-              <Picker.Item label='Rating' value='rating' />
-              <Picker.Item label='Menor precio' value='lower_price' />
-              <Picker.Item label='Mayor precio' value='higher_price' />
-              <Picker.Item label='Popularidad' value='popularity' />
-            </Picker>
-          </View>
-        </View>
+        <OrderByPicker
+          value={this.state.order}
+          onValueChange={this.pickerChangeValue}/>
         <FlatList
           style={style.res}
           data={this.state.data}
-          renderItem={ ({item}) => (
-            <TouchableOpacity
-              style={style.item_container}
-              onPress={() => {this.props.navigation.navigate('Product', { data: item })}}>
-              <View style={{flex: 3, alignSelf: 'center'}}>
-                {item.images
-                  ? <Image source={{uri: item.images[0]}} style={style.item_img}/>
-                  : <Ionicons name='eye-off' style={style.item_img_mis}/>}
-              </View>
-              <View style={style.item_info}>
-                  <Text style={style.item_name}>
-                    { item.name }
-                  </Text>
-                  <Text style={style.item_price}>
-                    ${ item.price }
-                  </Text>
-                  <Text style={style.item_rating}>
-                    calificación de clientes: { item.rating }
-                  </Text>
-                  <Text style={style.item_category}>
-                    { item.category }
-                  </Text>
-              </View>
-            </TouchableOpacity>
-        )}/>
+          renderItem={ this.renderItem }/>
       </View>
     )
   }
@@ -129,56 +125,5 @@ const style = StyleSheet.create({
     fontSize: 24,
     textAlign: 'center',
     color: 'black',
-  },
-  item_container: {
-    backgroundColor: colors.text,
-    flexDirection: 'row',
-    alignContent: 'center',
-    borderWidth: 0.8,
-  },
-  item_img: {
-    height: 100,
-    width: 100,
-    alignSelf: 'center',
-    backgroundColor: colors.placeholder,
-  },
-  item_info: {
-    flex: 8,
-    padding: '2%',
-    marginLeft: '2%',
-  },
-  item_img_mis: {
-    backgroundColor: colors.placeholder,
-    padding: '10%',
-    fontSize: 0.18 * SCREEN_WIDTH,
-    alignSelf: 'center',
-  },
-  item_name: {
-    fontWeight: 'bold',
-    fontSize: 22,
-  },
-  item_price: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  picker_container: {
-    width: '60%',
-    paddingLeft: '2%',
-    marginTop: '3%',
-    marginLeft: '35%',
-    flexDirection: 'row',
-  },
-  picker_text: {
-    color: colors.text,
-    alignSelf: 'center',
-    textAlign: 'center',
-    flex: 2.5,
-  },
-  picker: {
-    borderWidth: 1,
-    borderRadius: 10,
-    flex: 7,
-    alignSelf: 'center',
-    backgroundColor: colors.bg,
   },
 })
