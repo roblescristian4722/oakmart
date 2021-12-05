@@ -26,69 +26,71 @@ export default class Register extends Component {
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/register.php',
       img_url: null,
       img_server: null,
+      wait: false,
     }
   }
 
-  uploadImageToSever = async (uri) => {
-    const image = await fetch(uri).catch((err) => console.log(err))
-    const blob = await image.blob()
-    var reader = new FileReader()
-    reader.onload = () => {
-      var insert_API = 'https://cristianrobles4722.000webhostapp.com/oakmart/upload_photo.php'
-      var data = { img: reader.result }
-      var headers = {
-        'Accept': 'application/json',
-        'Content-Type': 'application.json'
-      }
-      fetch(insert_API, {
-        method: 'POST',
-        headers: headers,
-        body: JSON.stringify(data)
-      })
-      .then(res => res.text())
-      .then(res => {
-        this.setState({ img_server: res })
-      })
-    }
-    reader.readAsDataURL(blob)
-  }
-
-  getImgUrl = (url) => {
-    this.setState({ img_url: url })
-  }
-
-  register = async () => {
-    if (this.state.password !== this.state.password_conf) {
-      this.setState({ password_failed: 'Las contraseñas no coinciden' })
-    } else if (this.state.password_val === true && this.state.email_val === true
-      && (this.state.phone === '' || (this.state.phone !== '' && this.state.phone_val === true))) {
-      await this.uploadImageToSever(this.state.img_url).then(_ => {
-        fetch(this.state.endpoint, {
+  uploadImageToSever = async () => {
+  if (this.state.password !== this.state.password_conf) {
+    this.setState({ password_failed: 'Las contraseñas no coinciden' })
+  } else if (this.state.password_val === true && this.state.email_val === true
+    && (this.state.phone === '' || (this.state.phone !== '' && this.state.phone_val === true))) {
+      const image = await fetch(this.state.img_url).catch((err) => console.log(err))
+      const blob = await image.blob()
+      var reader = new FileReader()
+      reader.onload = () => {
+        var insert_API = 'https://cristianrobles4722.000webhostapp.com/oakmart/upload_photo.php'
+        var data = { img: reader.result }
+        var headers = {
+          'Accept': 'application/json',
+          'Content-Type': 'application.json'
+        }
+        fetch(insert_API, {
           method: 'POST',
-          body: JSON.stringify({
-            email: this.state.email,
-            password: this.state.password,
-            username: this.state.username,
-            phone: this.state.phone === '' ? null : this.state.phone,
-            image: 'https://cristianrobles4722.000webhostapp.com/' + this.state.img_server,
-          })
-        }).then(res => res.json())
-          .then(res => {
-            if (parseInt(res) === 1) {
-              alert('Registro realizado de manera exitosa, vuelva al menú e inicie sesión')
-              this.props.navigation.replace('Login')
-            } else if (parseInt(res) === 0)
-              this.setState({ register_failed: 'El email ya se encuentra en uso' })
-          })
-          .catch(_ => alert('Error con el servidor, vuelva a intentarlo más tarde'))
+          headers: headers,
+          body: JSON.stringify(data)
         })
-    } else {
+          .then(res => res.text())
+          .then(res => {
+            console.log(`res terminado ${res}`)
+            this.setState({ img_server: res, wait: false }, () => {this.register(res)})
+          })
+          .catch(e => console.log(`Error al subir imagen al server (${e})`))
+      }
+      reader.readAsDataURL(blob)
+  } else {
       this.setState({
         username_failed: this.state.username === '' ? 'Dato requerido' : null,
         register_failed: this.state.email === '' ? 'Dato requerido' : null,
         password_failed: this.state.password === '' ? 'Dato requerido' : null,
       })
     }
+  }
+
+  getImgUrl = (url) => {
+    this.setState({ img_url: url })
+  }
+
+  register = (path) => {
+    console.log(`path: ${path}`)
+    fetch(this.state.endpoint, {
+      method: 'POST',
+      body: JSON.stringify({
+        email: this.state.email,
+        password: this.state.password,
+        username: this.state.username,
+        phone: this.state.phone === '' ? null : this.state.phone,
+        image: 'https://cristianrobles4722.000webhostapp.com/' + path,
+      })
+    }).then(res => res.json())
+      .then(res => {
+        if (parseInt(res) === 1) {
+          alert('Registro realizado de manera exitosa, vuelva al menú e inicie sesión')
+          this.props.navigation.replace('Login')
+        } else if (parseInt(res) === 0)
+          this.setState({ register_failed: 'El email ya se encuentra en uso' })
+      })
+      .catch(_ => alert('Error con el servidor, vuelva a intentarlo más tarde'))
 }
 
   password_val = (e) => { this.setState({ password_val: e }) }
@@ -149,7 +151,7 @@ export default class Register extends Component {
 
         <TouchableOpacity
           style={style.btn}
-          onPress={this.register}>
+          onPress={this.uploadImageToSever}>
           <Text
             style={style.btn_text}>Registrarse</Text>
         </TouchableOpacity>

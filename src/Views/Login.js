@@ -19,10 +19,14 @@ export default class Login extends Component {
       login_failed: null,
     }
     
-    this.getStoredData().then(data => {
-      if (data !== null && data !== undefined)
-        this.props.navigation.replace('Menu', { data: data })
-    })
+    this.getStoredData()
+      .then(data => {
+        if (data !== null && data !== undefined) {
+          console.log(JSON.parse(data))
+          this.props.navigation.replace('Menu', { data: data })
+        }
+      })
+      .catch(_ => {})
   }
 
   getStoredData = async () => {

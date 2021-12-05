@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import { Text, ScrollView, TouchableOpacity, StyleSheet, Image } from 'react-native'
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import colors from '../../Components/colors'
 
@@ -41,7 +40,7 @@ export default class Settings extends Component {
 
           {
             this.state.user.image
-            ? <Image source={{uri: this.state.file_uri}} style={style.img}/>
+            ? <Image source={{uri: this.state.user.image}} style={style.img}/>
             : <Image source={require('../../../imgs/user.png')} style={style.img}/>
           }
 
