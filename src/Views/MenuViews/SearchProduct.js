@@ -52,10 +52,12 @@ export default class SearchProduct extends Component {
   }
 
   renderItem = ({item}) => {
+    console.log(item)
     return (
       <TouchableOpacity
         style={globalStyle.item_container}
-        onPress={() => {this.props.navigation.navigate('Product', { data: item })}}>
+        onPress={() => {this.props.navigation.navigate('Product', { id: item.id })}}
+      >
         <View style={globalStyle.item_img_container}>
           {item.images
             ? <Image source={{uri: item.images[0]}} style={globalStyle.item_img}/>

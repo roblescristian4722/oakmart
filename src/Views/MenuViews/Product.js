@@ -18,11 +18,42 @@ export default class Product extends Component {
   constructor(props) {
     super(props)
     this.state = {
-      stock: this.props.route.params.data.stock,
-      pieces: 0,
+      pieces: 1,
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/add_to_cart.php?',
+      update_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_by_id.php?',
+      img_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_images.php?',
+      data: null,
     }
-    this.data = this.props.route.params.data
+    this.id = this.props.route.params.id
+  }
+
+  componentDidMount() {
+    this.updateStock()
+  }
+
+  updateStock = async () => {
+    try {
+      const res = await fetch(this.state.update_endpoint, {
+        method: 'POST',
+        body: JSON.stringify({
+          product_id: [this.id]
+        }),
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application.json'
+        }
+      })
+      const data = await res.json()
+      const img_res = await fetch(this.state.img_endpoint + new URLSearchParams({
+        product_id: this.id
+      }))
+      const img = await img_res.json()
+      if (img.length > 0)
+        data[0].images = img
+      this.setState({ data: data[0] })
+    } catch (e) {
+      console.log(`Error al obtener stock (${e})`)
+    }
   }
 
   renderItem = ({item}) => {
@@ -33,18 +64,21 @@ export default class Product extends Component {
   }
 
   buyItem = async () => {
-    if (this.data.stock > 0 && this.state.pieces > 0) {
+    if (this.state.data.stock > 0 && this.state.pieces > 0) {
       await storage.load({ key: 'userData' })
         .then(ret => {
           fetch(this.state.endpoint + new URLSearchParams({
-            product_id: this.data.id,
+            product_id: this.id,
             pieces: this.state.pieces,
             user_id: parseInt(ret.id),
           }))
             .then(res => res.json())
             .then(res => {
-              if (parseInt(res) === 1)
+              if (parseInt(res) === 1) {
+                this.setState({ updated: !this.state.updated })
                 alert('Producto añadido al carrito exitosamente')
+                this.updateStock()
+              }
               else if (parseInt(res) === 2)
                 alert('No se pudo agregar el producto al carrito, no hay stock suficiente')
             })
@@ -54,72 +88,81 @@ export default class Product extends Component {
   }
 
   render() {
-    return (
-      <View
-        style={style.container}>
-        <ScrollView
-          style={style.data_container}>
-          <Text style={style.title}>
-            {this.data.name}
-          </Text>
+    if (this.state.data !== null)
+      return (
+        <View
+          style={style.container}>
+          <ScrollView
+            style={style.data_container}>
+            <Text style={style.title}>
+              {this.state.data.name}
+            </Text>
 
-          {this.data.images !== undefined
-          ? <View style={style.carousel}>
-              <Carousel
-                sliderWidth={SCREEN_WIDTH * 0.8}
-                itemWidth={SCREEN_WIDTH * 0.5}
-                data={this.data.images}
-                renderItem={this.renderItem}/>
-            </View>
-          : <Ionicons name='eye-off' style={style.item_img_mis}/>}
+            {this.state.data.images !== undefined
+            ? <View style={style.carousel}>
+                <Carousel
+                  sliderWidth={SCREEN_WIDTH * 0.8}
+                  itemWidth={SCREEN_WIDTH * 0.5}
+                  data={this.state.data.images}
+                  renderItem={this.renderItem}/>
+              </View>
+            : <Ionicons name='eye-off' style={style.item_img_mis}/>}
 
-          <Text style={style.category}>
-            Categoría: {this.data.category}
-          </Text>
+            <Text style={style.category}>
+              Categoría: {this.state.data.category}
+            </Text>
 
-          <Text style={style.price}>
-            Precio: ${this.data.price}
-          </Text>
+            <Text style={style.price}>
+              Precio: ${this.state.data.price}
+            </Text>
 
-          <Text style={style.description}>
-            Descripción: {this.data.description}
-          </Text>
+            <Text style={style.description}>
+              Descripción: {this.state.data.description}
+            </Text>
 
-          <View style={style.buy_container}>
-            <TouchableOpacity
-              style={style.buy_btn}
-              onPress={this.buyItem}>
-              <Text
-                style={style.buy_btn_text}>
-                Comprar
-              </Text>
-            </TouchableOpacity>
-            <View style={style.counter_container}>
-              <TouchableOpacity style={style.minus}
-                onPress={() => {
-                  if (this.state.pieces > 0)
-                    this.setState({ pieces: this.state.pieces - 1 })
-                }}>
-                <Text style={style.minus_text}>
-                  -
+            {
+              this.state.data.stock > 0
+              ? <View style={style.buy_container}>
+                  <TouchableOpacity
+                    style={style.buy_btn}
+                    onPress={this.buyItem}>
+                    <Text
+                      style={style.buy_btn_text}>
+                      Comprar
+                    </Text>
+                  </TouchableOpacity>
+                  <View style={style.counter_container}>
+                    <TouchableOpacity style={style.minus}
+                      onPress={() => {
+                        if (this.state.pieces > 1)
+                          this.setState({ pieces: this.state.pieces - 1 })
+                      }}>
+                      <Text style={style.minus_text}>
+                        -
+                      </Text>
+                    </TouchableOpacity>
+                    <Text style={style.pieces}>{this.state.pieces}</Text>
+                    <TouchableOpacity style={style.plus}
+                      onPress={() => {
+                        if (this.state.pieces < this.state.data.stock)
+                          this.setState({ pieces: this.state.pieces + 1 })
+                      }}>
+                      <Text style={style.plus_text}>
+                        +
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              : <Text style={style.no_stock_text}>
+                  No hay stock suficiente
                 </Text>
-              </TouchableOpacity>
-              <Text style={style.pieces}>{this.state.pieces}</Text>
-              <TouchableOpacity style={style.plus}
-                onPress={() => {
-                  if (this.state.pieces < this.state.stock)
-                    this.setState({ pieces: this.state.pieces + 1 })
-                }}>
-                <Text style={style.plus_text}>
-                  +
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            }
 
-        </ScrollView>
-      </View>
-    )
+          </ScrollView>
+        </View>
+      )
+    else
+      return null
   }
 }
 
@@ -130,7 +173,7 @@ const style = StyleSheet.create({
     backgroundColor: colors.secondaryBg,
   },
   carousel: {
-    marginTop: '5%',
+    marginTop: '10%',
   },
   data_container: {
     width: '90%',
@@ -143,6 +186,7 @@ const style = StyleSheet.create({
     fontSize: 28,
     textAlign: 'center',
     color: 'black',
+    marginTop: '5%',
   },
   price: {
     marginTop: '3%',
@@ -162,6 +206,7 @@ const style = StyleSheet.create({
   },
   item_img_mis: {
     backgroundColor: colors.placeholder,
+    marginTop: '10%',
     padding: '10%',
     fontSize: 0.18 * SCREEN_WIDTH,
     alignSelf: 'center',
@@ -212,5 +257,11 @@ const style = StyleSheet.create({
     marginLeft: '3%',
     marginRight: '3%',
     color: 'black',
+  },
+  no_stock_text: {
+    marginTop: '5%',
+    textAlign: 'center',
+    fontSize: 16,
+    color: 'red',
   }
 })

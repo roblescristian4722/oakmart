@@ -28,31 +28,8 @@ export default class Home extends Component {
   }
   
   searchProduct = async () => {
-    if (this.state.search !== '') {
-      await fetch(this.state.endpoint + new URLSearchParams({
-        search: this.state.search,
-        order: 'rating',
-      }))
-      .then(res => res.json())
-      .then(res => {
-        if (parseInt(res) !== 0) {
-          let data = [...res];
-          for (let i = 0; i < data.length; i++) {
-            fetch(this.state.img_endpoint + new URLSearchParams({
-              product_id: data[i].id
-            }))
-            .then(res => res.json())
-            .then(res => {
-              if (res[0] !== undefined)
-                data[i].images = res
-            })
-            .catch(err => console.log(`error al obtener las imágenes (${err})`))
-          }
-          this.setState({ show_search: true })
-        }
-      })
-      .catch(res => alert(`Error: ingrese un dato válido (${res})`))
-    }
+    if (this.state.search !== '')
+      this.setState({ show_search: true })
   }
 
   // Obtiene todos los productos de la tienda para mostrarlos en el Home
@@ -96,7 +73,7 @@ export default class Home extends Component {
     return (
       <TouchableOpacity
         style={globalStyle.item_container}
-        onPress={() => {this.props.navigation.navigate('Product', { data: item })}}>
+        onPress={() => {this.props.navigation.navigate('Product', { id: item.id })}}>
         <View style={globalStyle.item_img_container}>
           {item.images
             ? <Image source={{uri: item.images[0]}} style={globalStyle.item_img}/>
