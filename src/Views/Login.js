@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { ScrollView, Text, TouchableOpacity, StyleSheet, View } from 'react-native';
 import Input from '../Components/Input';
-import storage from '../Components/storage';
+
 import colors from '../Components/colors';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default class Login extends Component {
   constructor(props) {
@@ -17,18 +18,24 @@ export default class Login extends Component {
       password_regex: RegExp(".{8,25}"),
       login_failed: null,
     }
+    
+    this.getStoredData().then(data => {
+      if (data !== null && data !== undefined)
+        this.props.navigation.replace('Menu', { data: data })
+    })
   }
 
-  componentDidMount() {
-    storage.load({ key: 'userData' })
-      .then(ret => {
-        this.props.navigation.replace('Menu', { data: ret })
-      })
-      .catch(_ => {})
+  getStoredData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@user_data')
+      return jsonValue != null ? JSON.parse(jsonValue) : null
+    } catch (e) {
+      console.log(`Error al obtener datos de usuario (${e})`)
+    }
   }
 
-  login = async () => {
-    await fetch(this.state.endpoint, {
+  login = () => {
+    fetch(this.state.endpoint, {
       method: 'POST',
       body: JSON.stringify({
         email: this.state.email,
@@ -38,13 +45,17 @@ export default class Login extends Component {
       .then(res => {
         // Si el usuario se loggea exitosamente entonces retornamos sus datos
         if (parseInt(res) !== 0) {
-          this.setState({input_style: style.input})
-          // Almacena los datos del usuario en el almacenamiento del dispositivo
-          storage.save({
-            key: 'userData',
-            data: res
+          this.setState({input_style: style.input}, async () => {
+            // Almacena los datos del usuario en el almacenamiento del dispositivo
+            try {
+              const jsonValue = JSON.stringify(res)
+              await AsyncStorage.setItem('@user_data', jsonValue)
+              console.log(`login token: ${res.id}`)
+              this.props.navigation.replace('Menu', { data: res })
+            } catch (e) {
+              console.log(`Error al almacenar token de usuario (${e})`)
+            }
           })
-          this.props.navigation.replace('Menu', { data: res })
         } else
           this.setState({login_failed: 'Email y/o contraseña incorrectos'})
       })

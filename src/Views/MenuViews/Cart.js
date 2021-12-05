@@ -11,14 +11,9 @@ import {ScrollView,
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { Dimensions } from 'react-native'
 const SCREEN_WIDTH = Dimensions.get("window").width;
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import colors from '../../Components/colors'
-import AsyncStorage from '@react-native-community/async-storage';
-import Storage from 'react-native-storage';
-const storage = new Storage({
-  storageBackend: AsyncStorage,
-  defaultExpires: null,
-})
 
 export default class Cart extends Component {
   constructor(props) {
@@ -36,89 +31,104 @@ export default class Cart extends Component {
     }
   }
 
+  getStoredData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@user_data')
+      return jsonValue != null ? JSON.parse(jsonValue) : null
+    } catch (e) {
+      console.log(`Error al obtener datos de usuario (${e})`)
+    }
+  }
+
   getCartProducts = async () => {
     // Se obtienen los datos del usuario loggeado
-    await storage.load({ key: 'userData' })
-      .then( user => {
-        // Se obtienen los productos del carrito del usuario
-        fetch(this.state.endpoint + new URLSearchParams({
-          user_id: user.id
-        }))
-          .then(res => res.json())
-          .then(res => {
-            if (res.length === 0)
-              this.setState({ data: null })
-            else {
-              let data = res
-              let product_id = []
-              for (let i of res)
-                product_id = [...product_id, parseInt(i.product_id)]
-              // se obtiene la información de cada unos de los productos del carrito
-              fetch(this.state.sec_endpoint, {
-                method: 'POST',
-                headers: {
-                  'Accept': 'application/json',
-                  'Content-Type': 'application.json',
-                },
-                body: JSON.stringify({
-                  'product_id': product_id,
-                })
-              })
-                .then(res => res.json())
-                .then(res => {
-                  for (let i = 0; i < res.length; i++) {
-                    res[i].pieces = data[i].pieces
-                    res[i].cart_id = data[i].cart_id
-                  }
-                  data = res
-                  for(let i = 0; i < data.length; i++) {
-                    // Se obtienen las imágenes de los productos
-                    fetch(this.state.img_endpoint + new URLSearchParams({
-                      product_id: data[i].id,
-                    }))
-                      .then(res => res.json())
-                      .then(res => {
-                        if (res[0] !== undefined)
-                          data[i].images = res[0]
-                        this.setState({ data: data })
-                      })
-                      .catch(err => `Error al obtener imágenes (${err})`)
-                  }
-                })
-                .catch(err => console.log(`Error al obtener productos por id (${err})`))
-            }
+    const user = await this.getStoredData()
+    // Se obtienen los productos del carrito del usuario
+    try {
+      const cart = await fetch(this.state.endpoint + new URLSearchParams({
+            user_id: user.id
+          }))
+      const cart_json = await cart.json()
+      if (cart_json.length === 0)
+        this.setState({ data: null })
+      else {
+        let product_id = []
+        for (let i of cart_json)
+          product_id = [...product_id, parseInt(i.product_id)]
+        // se obtiene la información de cada unos de los productos del carrito
+        try {
+        const prod_info = await fetch(this.state.sec_endpoint, {
+          method: 'POST',
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application.json',
+          },
+          body: JSON.stringify({
+            'product_id': product_id,
           })
-          .catch(err => console.log(`Error al recibir productos del carrito (${err})`))
-      })
+        })
+        const prod_info_json = await prod_info.json()
+        console.log(`products: ${JSON.stringify(prod_info_json)}`)
+        for (let i = 0; i < prod_info_json.length; i++) {
+          prod_info_json[i].pieces = cart_json[i].pieces
+          prod_info_json[i].cart_id = cart_json[i].cart_id
+        }
+        // Se obtienen las imágenes de los productos
+        for(let i = 0; i < prod_info_json.length; i++) {
+          try {
+          const prod_img = await fetch(this.state.img_endpoint + new URLSearchParams({
+            product_id: prod_info_json[i].id,
+          }))
+          const prod_img_json = await prod_img.json()
+          if (prod_img_json[0] !== undefined)
+            prod_info_json[i].images = prod_img_json[0]
+          } catch (e) {
+            console.log(`Error al obtener imágenes (${e})`)
+          }
+        }
+        console.log(`prod_info_json: ${JSON.stringify(prod_info_json)}`)
+        this.setState({ data: prod_info_json })
+        } catch (e) {
+          console.log(`Error al obtener productos por id (${e})`)
+        }
+      }
+    } catch(e) {
+      console.log(`Error al recibir productos del carrito (${err})`)
+    }
   }
 
   componentDidMount() {
     this.getCartProducts()
   }
 
-  buyProduct = async () => {
-    for (let i of this.state.data)
-      await fetch(this.state.buy_endpoint, {
-        method: 'POST',
-        headers: {
-          'Accept': 'application/json',
-          'Content-Type': 'application.json',
-        },
-        body: JSON.stringify({
-          'user_id': i.user_id,
-          'product_id': i.id,
-          'order_id': i.cart_id,
-        })
+  buyProduct = () => {
+    this.getStoredData()
+      .then(user => {
+        for (let i of this.state.data) {
+          console.log(`i: ${i.user_id}`)
+          fetch(this.state.buy_endpoint, {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application.json',
+            },
+            body: JSON.stringify({
+              'user_id': user.id,
+              'product_id': i.id,
+              'order_id': i.cart_id,
+            })
+          })
+            .then(res => res.json())
+            .then(res => {
+              if (parseInt(res) === 1)
+                ToastAndroid.show(`Producto ${i.name} comprado de manera exitosa`, ToastAndroid.SHORT)
+              else if (parseInt(res) === 0)
+                ToastAndroid.show(`Ha surgido un error al intentar comprar ${i.name}`, ToastAndroid.SHORT)
+              this.getCartProducts()
+            })
+            .catch(err => console.log(`Error al realizar la compra (${err})`))
+        }
       })
-        .then(res => res.json())
-        .then(res => {
-          if (parseInt(res) === 1)
-            ToastAndroid.show(`Producto ${i.name} comprado de manera exitosa`, ToastAndroid.SHORT)
-          else if (parseInt(res) === 0)
-            ToastAndroid.show(`Ha surgido un error al intentar comprar ${i.name}`, ToastAndroid.SHORT)
-          this.getCartProducts()
-        })
-        .catch(err => console.log(`Error al realizar la compra (${err})`))
   }
 
   removeProduct = async (cart_id) => {
@@ -176,7 +186,8 @@ export default class Cart extends Component {
           <TouchableOpacity
             style={style.buy_btn}
             onPress={this.buyProduct}>
-            <Text style={style.buy_btn_text}>
+            <Text
+              style={style.buy_btn_text}>
               ¡Comprar!
             </Text>
           </TouchableOpacity>
@@ -196,7 +207,10 @@ export default class Cart extends Component {
             }}/>
           }>
           <View style={style.no_res}>
-          <Text style={style.no_res_text}>No hay elementos en el carrito, intente recargar la página</Text>
+            <Text
+              style={style.no_res_text}>
+              No hay elementos en el carrito, intente recargar la página
+            </Text>
           </View>
         </ScrollView>
       )

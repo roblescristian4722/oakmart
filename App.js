@@ -1,8 +1,7 @@
 import React, { Component } from 'react'
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-// Componentes
-import storage from './src/Components/storage';
+
 // Vistas
 import Menu from './src/Views/Menu';
 import Register from './src/Views/Register';
@@ -18,22 +17,6 @@ export default class App extends Component {
       path: '',
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/index.php',
       res: null,
-    }
-  }
-
-  componentDidMount() {
-    this.readUserData()
-  }
-
-  readUserData = () => {
-    if (!this.state.res) {
-      storage.load({ key: 'userData' })
-        .then(ret => {
-          this.setState({ res: ret })
-        })
-        .catch(_ => {
-          this.setState({ res: null })
-        })
     }
   }
 

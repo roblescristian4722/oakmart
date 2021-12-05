@@ -9,9 +9,6 @@ import Settings from '../Views/MenuViews/Settings';
 import CartMenu from '../Views/MenuViews/CartMenu';
 import Sell from '../Views/MenuViews/Sell';
 
-// Custom components
-import storage from '../Components/storage';
-
 const Tab = createBottomTabNavigator();
 
 export default class Main extends Component {
@@ -19,11 +16,7 @@ export default class Main extends Component {
     super(props)
     this.state = {
     }
-  }
-  
-  removeUserData = () => {
-    storage.remove({ key: 'userData' })
-    this.props.navigation.replace('Login')
+    this.data = this.props.route.params.data
   }
 
   setData = (res) => {
@@ -31,8 +24,7 @@ export default class Main extends Component {
   }
 
   render() {
-    const data = this.props.route.params.data
-    if (!data)
+    if (!this.data)
       return (
         <Text>Cargando...</Text>
       );
@@ -61,11 +53,11 @@ export default class Main extends Component {
         })}
       >
         <Tab.Screen name='Inicio' children={() => <Home navigation={this.props.navigation}/> }/>
-        <Tab.Screen name='Vender' children={() => <Sell data={data}
+        <Tab.Screen name='Vender' children={() => <Sell data={this.data}
                                                     navigation={this.props.navigation}/>} />
         <Tab.Screen name='Carrito de compras' component={CartMenu} />
         <Tab.Screen name='Configuraciones' children={() => <Settings
-                                                              data={data}
+                                                              data={this.data}
                                                               navigation={this.props.navigation}/>} />
       </Tab.Navigator>
     )

@@ -3,14 +3,8 @@ import { Image, ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'rea
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions } from 'react-native'
 const SCREEN_WIDTH = Dimensions.get("window").width;
-import AsyncStorage from '@react-native-community/async-storage';
-import Storage from 'react-native-storage';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
-const storage = new Storage({
-  storageBackend: AsyncStorage,
-  defaultExpires: null,
-})
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import colors from '../../Components/colors'
 
@@ -29,13 +23,20 @@ export default class Product extends Component {
   }
 
   componentDidMount() {
-    this.getUserID()
-    this.updateStock()
+    this.getStoredData()
+      .then(ret => {
+        this.setState({ user_id: ret.id })
+        this.updateStock()
+      })
   }
 
-  getUserID = async () => {
-    const user_data = await storage.load({ key: 'userData' })
-    this.setState({ user_id: user_data.id })
+  getStoredData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@user_data')
+      return jsonValue != null ? JSON.parse(jsonValue) : null
+    } catch (e) {
+      console.log(`Error al obtener datos de usuario (${e})`)
+    }
   }
 
   updateStock = async () => {
@@ -70,10 +71,11 @@ export default class Product extends Component {
       return <Ionicons name='eye-off' style={style.item_img_mis}/>
   }
 
-  buyItem = async () => {
+  buyItem = () => {
     if (this.state.data.stock > 0 && this.state.pieces > 0) {
-      await storage.load({ key: 'userData' })
+      this.getStoredData()
         .then(ret => {
+          console.log(ret.id)
           fetch(this.state.endpoint + new URLSearchParams({
             product_id: this.id,
             pieces: this.state.pieces,
@@ -95,6 +97,7 @@ export default class Product extends Component {
   }
 
   renderBuyButton = () => {
+    console.log(this.state.data.user_id, this.state.user_id)
     if (this.state.data.user_id === this.state.user_id)
       return <Text style={style.no_stock_text}>
         Este producto fue publicado por tí

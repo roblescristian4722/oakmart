@@ -3,16 +3,10 @@ import { View, Image, Text, FlatList, StyleSheet, ScrollView, RefreshControl } f
 
 import colors from '../../Components/colors'
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AsyncStorage from '@react-native-community/async-storage';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { Dimensions } from 'react-native'
 const SCREEN_WIDTH = Dimensions.get("window").width;
-
-import Storage from 'react-native-storage';
-const storage = new Storage({
-  storageBackend: AsyncStorage,
-  defaultExpires: null,
-})
 
 export default class Purchases extends Component {
   constructor(props) {
@@ -29,57 +23,70 @@ export default class Purchases extends Component {
     this.getPurchases()
   }
 
-  getPurchases = () => {
-    this.setState({ data: null }, () => {
+  getStoredData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem('@user_data')
+      return jsonValue != null ? JSON.parse(jsonValue) : null
+    } catch (e) {
+      console.log(`Error al obtener datos de usuario (${e})`)
+    }
+  }
+
+  getPurchases = async () => {
+    this.setState({ data: null }, async () => {
       // Se obtienen los datos del usuario
-      storage.load({ key: 'userData' })
-        .then(ret => {
-          // Se obtienen las compras realizadas por el usuario
-          fetch(this.state.endpoint + new URLSearchParams({
-            user_id: ret.id
+      try {
+        const user = await this.getStoredData()
+        // Se obtienen las compras realizadas por el usuario
+        try {
+          const pur = await fetch(this.state.endpoint + new URLSearchParams({
+            user_id: user.id
           }))
-            .then(res => res.json())
-            .then(res => {
-              let product_id = []
-              if (parseInt(res) !== 0) {
-                let data = res
-                for (let i of res)
-                  product_id = [...product_id, parseInt(i.product_id)]
-                // Se obtiene la información de cada producto
-                fetch(this.state.prod_endpoint, {
-                  method: 'POST',
-                  headers: {
-                    'Accept': 'application/json',
-                    'Content-Type': 'application.json'
-                  },
-                  body: JSON.stringify({
-                    'product_id': product_id
-                  })
+          const pur_json = await pur.json()
+          let product_id = []
+          if (parseInt(pur_json) !== 0) {
+              for (let i of pur_json)
+                product_id = [...product_id, parseInt(i.product_id)]
+            // Se obtiene la información de cada producto
+            try {
+              const prod_info = await fetch(this.state.prod_endpoint, {
+                method: 'POST',
+                headers: {
+                  'Accept': 'application/json',
+                  'Content-Type': 'application.json',
+                },
+                body: JSON.stringify({
+                  'product_id': product_id
                 })
-                  .then(res => res.json())
-                  .then(res => {
-                    if (parseInt(res) !== 0)
-                      for (let i = 0; i < data.length; i++) {
-                        data[i].product_info = res[i]
-                        // Se obtiene la imagen del producto
-                        fetch(this.state.img_endpoint + new URLSearchParams({
-                          product_id: data[i].product_id
-                        }))
-                          .then(res => res.json())
-                          .then(res => {
-                            if (res[0] !== undefined)
-                              data[i].product_info.images = res[0]
-                            this.setState({ data: data })
-                          })
-                          .catch(err => console.log(`Error al obtener imágenes (${err})`))
-                      }
-                  })
-                  .catch(err => console.log(`Error al obtener datos del producto (${err})`))
+              })
+              const prod_info_json = await prod_info.json()
+              if (parseInt(prod_info_json) !== 0) {
+                for (let i = 0; i < prod_info_json.length; i++) {
+                  pur_json[i].product_info = prod_info_json[i]
+                  // Se obtiene la imagen del producto
+                  try {
+                    const prod_img = await fetch(this.state.img_endpoint + new URLSearchParams({
+                      product_id: pur_json[i].product_id
+                    }))
+                    const prod_img_json = await prod_img.json()
+                    if (prod_img_json[0] !== undefined)
+                      pur_json[i].product_info.images = prod_img_json[0]
+                  } catch (e) {
+                    console.log(`Error al obtener imágenes (${e})`)
+                  }
+                }
+                this.setState({ data: pur_json })
               }
-            })
-            .catch(err => `Error al obtener historial (${err})`)
-        })
-    })
+            } catch (e) {
+              console.log(`Error al obtener datos del producto (${err})`)
+            }
+          }
+        } catch(e) {
+          console.log(`Error al obtener historial (${e})`)
+        }
+      } catch (e) {
+        console.log(`Error al obtener datos de usuario (${e})`)
+      }})
   }
 
   renderItem = ({item}) => {
