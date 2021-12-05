@@ -23,12 +23,19 @@ export default class Product extends Component {
       update_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_by_id.php?',
       img_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_images.php?',
       data: null,
+      user_id: null,
     }
     this.id = this.props.route.params.id
   }
 
   componentDidMount() {
+    this.getUserID()
     this.updateStock()
+  }
+
+  getUserID = async () => {
+    const user_data = await storage.load({ key: 'userData' })
+    this.setState({ user_id: user_data.id })
   }
 
   updateStock = async () => {
@@ -87,6 +94,50 @@ export default class Product extends Component {
     }
   }
 
+  renderBuyButton = () => {
+    if (this.state.data.user_id === this.state.user_id)
+      return <Text style={style.no_stock_text}>
+        Este producto fue publicado por tí
+      </Text>
+    if (this.state.data.stock > 0)
+      return <View style={style.buy_container}>
+          <TouchableOpacity
+            style={style.buy_btn}
+            onPress={this.buyItem}>
+            <Text
+              style={style.buy_btn_text}>
+              Comprar
+            </Text>
+          </TouchableOpacity>
+          <View style={style.counter_container}>
+            <TouchableOpacity style={style.minus}
+              onPress={() => {
+                if (this.state.pieces > 1)
+                  this.setState({ pieces: this.state.pieces - 1 })
+              }}>
+              <Text style={style.minus_text}>
+                -
+              </Text>
+            </TouchableOpacity>
+            <Text style={style.pieces}>{this.state.pieces}</Text>
+            <TouchableOpacity style={style.plus}
+              onPress={() => {
+                if (this.state.pieces < this.state.data.stock)
+                  this.setState({ pieces: this.state.pieces + 1 })
+              }}>
+              <Text style={style.plus_text}>
+                +
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+    return (
+      <Text style={style.no_stock_text}>
+          No hay stock suficiente
+      </Text>
+    )
+  }
+
   render() {
     if (this.state.data !== null)
       return (
@@ -120,43 +171,7 @@ export default class Product extends Component {
               Descripción: {this.state.data.description}
             </Text>
 
-            {
-              this.state.data.stock > 0
-              ? <View style={style.buy_container}>
-                  <TouchableOpacity
-                    style={style.buy_btn}
-                    onPress={this.buyItem}>
-                    <Text
-                      style={style.buy_btn_text}>
-                      Comprar
-                    </Text>
-                  </TouchableOpacity>
-                  <View style={style.counter_container}>
-                    <TouchableOpacity style={style.minus}
-                      onPress={() => {
-                        if (this.state.pieces > 1)
-                          this.setState({ pieces: this.state.pieces - 1 })
-                      }}>
-                      <Text style={style.minus_text}>
-                        -
-                      </Text>
-                    </TouchableOpacity>
-                    <Text style={style.pieces}>{this.state.pieces}</Text>
-                    <TouchableOpacity style={style.plus}
-                      onPress={() => {
-                        if (this.state.pieces < this.state.data.stock)
-                          this.setState({ pieces: this.state.pieces + 1 })
-                      }}>
-                      <Text style={style.plus_text}>
-                        +
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              : <Text style={style.no_stock_text}>
-                  No hay stock suficiente
-                </Text>
-            }
+            { this.renderBuyButton() }
 
           </ScrollView>
         </View>
