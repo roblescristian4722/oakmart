@@ -1,7 +1,14 @@
 import React, { Component } from 'react'
-import { Image, ScrollView, View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import {TextInput,
+        Image,
+        ScrollView,
+        View,
+        Text,
+        StyleSheet,
+        TouchableOpacity } from 'react-native'
 import Carousel from 'react-native-snap-carousel';
 import { Dimensions } from 'react-native'
+import {Picker} from '@react-native-picker/picker';
 const SCREEN_WIDTH = Dimensions.get("window").width;
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,19 +23,65 @@ export default class Product extends Component {
       endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/add_to_cart.php?',
       update_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_by_id.php?',
       img_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_images.php?',
+      rev_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/ratings.php?',
+      send_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/rate.php?',
+      user_endpoinit: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_user_by_id.php?',
       data: null,
       user_id: null,
       ratings: null,
+      reviews: null,
+      rating: 0,
+      comment: '',
     }
     this.id = this.props.route.params.id
   }
 
   componentDidMount() {
+    this.getReviews()
     this.getStoredData()
       .then(ret => {
         this.setState({ user_id: ret.id })
         this.updateStock()
       })
+  }
+
+  getReviews = async () => {
+    try {
+      const res = await fetch(this.state.rev_endpoint + new URLSearchParams({
+        product_id: this.id
+      }))
+      const res_json = await res.json()
+      if (res_json.length > 0) {
+        for (let i = 0; i < res_json.length; i++) {
+          const user_res = await fetch (this.state.user_endpoinit + new URLSearchParams({
+            id: res_json[i].user_id
+          }))
+          const user_res_json = await user_res.json()
+          res_json[i].username = user_res_json
+        }
+        this.setState({ reviews: res_json })
+      }
+    } catch (e) {
+      console.log(`Error al obtener reviews (${e})`)
+    }
+  }
+
+  sendReview = async () => {
+    try {
+      const res = await fetch(this.state.send_endpoint + new URLSearchParams({
+        product_id: this.id,
+        user_id: this.state.user_id,
+        commentary: this.state.comment === '' ? null : this.state.comment,
+        rating: this.state.rating,
+      }))
+      const res_json = await res.json()
+      if (parseInt(res_json) === 1)
+        alert('Reseña realizada con éxito')
+      else if (parseInt(res_json) === 0)
+        alert('Error al enviar la reseña')
+    } catch (e) {
+      console.log(`Error al enviar reseña (${e})`)
+    }
   }
 
   getStoredData = async () => {
@@ -97,8 +150,36 @@ export default class Product extends Component {
     }
   }
 
+  renderReviews = (item, index) => {
+    if (item !== undefined)
+      return (
+        <View
+          style={style.user_rev_inner_container}
+          key={index}>
+          <View
+            style={{ flexDirection: 'row' }}>
+            <Text
+              style={style.user_rev_username}>
+              {item.username}
+            </Text>
+            <Text
+              style={style.user_rev_rating}>
+              calificación: {item.rating}
+            </Text>
+          </View>
+          {
+            item.commentary
+            ? <Text
+                style={style.user_rev_commentary}>
+                {item.commentary}
+              </Text>
+            : null
+          }
+        </View>
+      )
+  }
+
   renderBuyButton = () => {
-    console.log(this.state.data.user_id, this.state.user_id)
     if (this.state.data.user_id === this.state.user_id)
       return <Text style={style.no_stock_text}>
         Este producto fue publicado por tí
@@ -145,9 +226,9 @@ export default class Product extends Component {
   render() {
     if (this.state.data !== null)
       return (
-        <View
+        <ScrollView
           style={style.container}>
-          <ScrollView
+          <View
             style={style.data_container}>
             <Text style={style.title}>
               {this.state.data.name}
@@ -177,13 +258,61 @@ export default class Product extends Component {
 
             { this.renderBuyButton() }
 
-          </ScrollView>
+          </View>
 
-          <FlatList
-            style={style.ratings_container}
-            data={this.state.ratings}
-            />
-        </View>
+          <View
+            style={style.review_container}>
+            <Text style={style.review_title}>
+              Añadir una reseña
+            </Text>
+            <TextInput
+              style={style.comment}
+              placeholder="Escribe un comentario del producto"
+              onChangeText={e => this.setState({ comment: e })}
+              multiline={true}
+              />
+            <View style={{ flexDirection: 'row' }}>
+              <Picker
+                style={style.review_picker}
+                selectedValue={this.state.rating}
+                onValueChange={e => this.setState({ rating: e })}
+              >
+                <Picker.Item label='0' value={0} />
+                <Picker.Item label='1' value={1} />
+                <Picker.Item label='2' value={2} />
+                <Picker.Item label='3' value={3} />
+                <Picker.Item label='4' value={4} />
+                <Picker.Item label='5' value={5} />
+              </Picker>
+              <TouchableOpacity
+                style={style.review_btn}
+                onPress={this.sendReview}
+                >
+                <Text style={style.review_btn_text}>
+                  Enviar reseña
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          <View
+            style={style.user_rev_container}>
+            <Text
+              style={style.ratings_title}>
+              Reseñas
+            </Text>
+            <ScrollView
+              style={style.ratings_container}
+              >
+                {
+                  this.state.reviews
+                  ? this.state.reviews.map((item, index) => this.renderReviews(item, index))
+                  : null
+                }
+            </ScrollView>
+          </View>
+
+        </ScrollView>
       )
     else
       return null
@@ -250,6 +379,7 @@ const style = StyleSheet.create({
     marginTop: '5%',
     flexDirection: 'row',
     width: '70%',
+    marginBottom: '10%',
     alignSelf: 'center',
   },
   counter_container: {
@@ -287,5 +417,62 @@ const style = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     color: 'red',
+  },
+  review_container: {
+    width: '90%',
+    alignSelf: 'center',
+    marginBottom: '5%',
+    paddingBottom: '2%',
+    paddingTop: '2%',
+    backgroundColor: colors.btnBg,
+  },
+  review_picker: {
+    flex: 2,
+    color: colors.text,
+    marginLeft: '5%',
+  },
+  review_btn: {
+    flex: 5,
+    alignSelf: 'center',
+  },
+  review_btn_text: {
+    textAlign: 'center',
+    borderWidth: 1,
+    marginRight: '5%',
+    borderRadius: 10,
+    backgroundColor: colors.bg,
+  },
+  user_rev_container: {
+    alignSelf: 'center',
+    width: '90%',
+    backgroundColor: colors.btnBg,
+    padding: '5%',
+  },
+  user_rev_inner_container: {
+    marginTop: '2%',
+    borderWidth: 1,
+    padding: '2%',
+  },
+  user_rev_username: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    flex: 3,
+  },
+  user_rev_rating: {
+    flex: 3,
+  },
+  comment: {
+    borderWidth: 1,
+    width: '95%',
+    alignSelf: 'center',
+    marginTop: '5%',
+  },
+  review_title: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  ratings_title: {
+    fontSize: 16,
+    textAlign: 'center',
   }
 })
