@@ -18,11 +18,12 @@ export default class Login extends Component {
       password_regex: RegExp(".{8,25}"),
       login_failed: null,
     }
-    
+  }
+
+  componentDidMount() {
     this.getStoredData()
       .then(data => {
-        if (data !== null && data !== undefined) {
-          console.log(JSON.parse(data))
+        if (data !== null) {
           this.props.navigation.replace('Menu', { data: data })
         }
       })

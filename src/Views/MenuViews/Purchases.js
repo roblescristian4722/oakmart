@@ -43,6 +43,7 @@ export default class Purchases extends Component {
             user_id: user.id
           }))
           const pur_json = await pur.json()
+          console.log(`purchases: ${pur_json}`)
           let product_id = []
           if (parseInt(pur_json) !== 0) {
               for (let i of pur_json)
@@ -116,9 +117,8 @@ export default class Purchases extends Component {
               <RefreshControl
                 refreshing={this.state.refreshing}
                 onRefresh={() => {
-                  this.getPurchases()
-                  this.setState({ refresh: true })
-                  setTimeout(() => this.setState({ refreshing: false }), 2000)
+                  this.setState({ refreshing: true }, () => this.getPurchases())
+                  setTimeout(() => this.setState({ refreshing: false }), 1000)
               }}/>
             }/>
         </View>
@@ -131,9 +131,8 @@ export default class Purchases extends Component {
             <RefreshControl
               refreshing={this.state.refreshing}
               onRefresh={() => {
-                this.getPurchases()
-                this.setState({ refresh: true })
-                setTimeout(() => this.setState({ refresing: false }), 2000)
+                this.setState({ refreshing: true }, () => this.getPurchases())
+                setTimeout(() => this.setState({ refreshing: false }), 1000)
               }}/>
           }>
           <View style={style.no_res}>

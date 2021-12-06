@@ -18,6 +18,7 @@ export default class Product extends Component {
       img_endpoint: 'https://cristianrobles4722.000webhostapp.com/oakmart/get_product_images.php?',
       data: null,
       user_id: null,
+      ratings: null,
     }
     this.id = this.props.route.params.id
   }
@@ -177,6 +178,11 @@ export default class Product extends Component {
             { this.renderBuyButton() }
 
           </ScrollView>
+
+          <FlatList
+            style={style.ratings_container}
+            data={this.state.ratings}
+            />
         </View>
       )
     else

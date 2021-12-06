@@ -84,6 +84,7 @@ export default class Register extends Component {
       })
     }).then(res => res.json())
       .then(res => {
+        console.log(`res: ${res}`)
         if (parseInt(res) === 1) {
           alert('Registro realizado de manera exitosa, vuelva al menú e inicie sesión')
           this.props.navigation.replace('Login')
