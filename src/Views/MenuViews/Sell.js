@@ -231,6 +231,7 @@ const style = StyleSheet.create({
     marginTop: '3%',
     paddingLeft: '2%',
     flex: 3,
+    color: 'black',
   },
   picker_container: {
     alignSelf: 'center',

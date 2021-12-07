@@ -356,6 +356,7 @@ const style = StyleSheet.create({
   category: {
     marginTop: '2%',
     marginLeft: '5%',
+    color: 'black',
   },
   item_img_mis: {
     backgroundColor: colors.placeholder,
